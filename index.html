@@ -260,11 +260,11 @@ h2{font-size:clamp(1.15rem,2.4vw,1.5rem);font-weight:800;margin:2rem 0 .8rem}
 
 /* ---------- 角落翻页 ---------- */
 .pager{
-  position:fixed;right:16px;bottom:16px;z-index:9999;
+  position:fixed;left:16px;bottom:16px;z-index:9999;
   display:flex;gap:.7rem;-webkit-transform:translateZ(0);transform:translateZ(0);
 }
 @supports (bottom:env(safe-area-inset-bottom)){
-  .pager{right:calc(16px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom))}
+  .pager{left:calc(16px + env(safe-area-inset-left));bottom:calc(16px + env(safe-area-inset-bottom))}
 }
 .pager button{
   min-width:64px;height:56px;border-radius:28px;padding:0 1.1rem;
