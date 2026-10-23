@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>租房任务 · 中文课</title>
+<style>
+:root{
+  --ink:#1c1917; --muted:#57534e; --line:#e7e5e4; --bg:#fdfcf9;
+  --blue:#2563eb; --blue-s:#eff6ff;
+  --green:#15803d; --green-s:#f0fdf4;
+  --amber:#b45309; --amber-s:#fffbeb;
+  --rose:#be123c; --rose-s:#fff1f2;
+  --purple:#6d28d9; --purple-s:#f5f3ff;
+  --soft:#f5f5f4;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{
+  font-size: clamp(16px, 1.2vw + 10px, 22px);
+}
+@media (min-width: 768px) and (max-width: 1366px) {
+  html { font-size: clamp(17px, 1.4vw + 10px, 24px); }
+}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  line-height:1.75;-webkit-text-size-adjust:100%;
+  overscroll-behavior-x:none;
+  padding: 4.5rem 0 5rem;
+}
+@media (min-width: 768px) {
+  body { padding: 5rem 0 5.5rem; }
+}
+
+/* ---------- 顶栏 ---------- */
+.bar{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  background:rgba(253,252,249,.95);backdrop-filter:blur(10px);
+  border-bottom:2px solid var(--line);
+}
+.bar .in{
+  max-width: 1024px;margin:0 auto;padding:.65rem 1.25rem;
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;
+}
+@media (min-width: 768px) {
+  .bar .in { max-width: 1100px; padding: .75rem 1.75rem; }
+}
+.bar .title{font-weight:800;font-size:1.05rem}
+.bar .meta{font-size:.88rem;color:var(--muted);font-weight:600;white-space:nowrap}
+
+/* ---------- 布局 ---------- */
+.wrap{
+  max-width: 1024px;margin:0 auto;padding:1.5rem 1.25rem;
+}
+@media (min-width: 768px) {
+  .wrap { max-width: 1100px; padding: 2rem 1.75rem; }
+}
+.page{display:none}
+.page.active{display:block;animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+h1{font-size:clamp(1.55rem,3.5vw,2.25rem);font-weight:900;letter-spacing:-.01em;margin:.2rem 0 .4rem;line-height:1.25}
+h2{font-size:clamp(1.15rem,2.4vw,1.5rem);font-weight:800;margin:2rem 0 .8rem}
+.sub{color:var(--muted);font-size:.98rem;margin:0 0 1.4rem}
+@media (min-width: 768px) {
+  .sub { font-size: 1.05rem; }
+}
+.big{font-size:1.15rem}
+
+/* ---------- 提示块 ---------- */
+.callout{
+  display:flex;gap:.8rem;align-items:flex-start;
+  background:var(--soft);border-left:8px solid #a8a29e;
+  border-radius:0 12px 12px 0;padding:1rem 1.15rem;margin:1rem 0;
+  font-size:1.02rem;
+}
+@media (min-width: 768px) {
+  .callout { padding: 1.15rem 1.35rem; font-size: 1.08rem; }
+}
+.callout .ico{font-size:1.5rem;line-height:1.3;flex:0 0 auto}
+.callout.blue{background:var(--blue-s);border-left-color:var(--blue)}
+.callout.green{background:var(--green-s);border-left-color:var(--green)}
+.callout.amber{background:var(--amber-s);border-left-color:var(--amber)}
+.callout.rose{background:var(--rose-s);border-left-color:var(--rose)}
+.callout.purple{background:var(--purple-s);border-left-color:var(--purple)}
+
+/* ---------- 任务卡 ---------- */
+.mission{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:1rem;margin:1.4rem 0;
+}
+@media (min-width: 768px) {
+  .mission { gap: 1.35rem; }
+}
+.mcard{border-radius:16px;padding:1.2rem;border:2px solid rgba(0,0,0,.06)}
+.mcard .n{font-size:.78rem;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:.4rem}
+.mcard .t{font-weight:800;font-size:1.12rem;line-height:1.4}
+
+/* ---------- 按钮 ---------- */
+.btn{
+  font-family:inherit;font-size:1.02rem;font-weight:700;
+  background:#fff;border:2px solid var(--line);border-radius:14px;
+  padding:.8rem 1.5rem;min-height:56px;cursor:pointer;color:var(--ink);
+  transition:.15s;touch-action:manipulation;
+}
+.btn:hover{background:var(--soft)}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn:disabled{opacity:.3}
+@media (min-width: 768px) {
+  .btn { font-size: 1.08rem; padding: .9rem 1.75rem; min-height: 60px; }
+}
+
+/* ---------- 词卡 ---------- */
+.vgrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:1.2rem;
+}
+@media (min-width: 768px) {
+  .vgrid { gap: 1.5rem; }
+}
+.vcard{
+  border:2px solid var(--line);border-radius:18px;background:#fff;
+  overflow:hidden;cursor:pointer;transition:.18s;
+  box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+.vcard:active{transform:scale(.985)}
+.pic{
+  width:100%;aspect-ratio:4/3;background:var(--soft);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.pic img{width:100%;height:100%;object-fit:cover;display:block}
+.pic .emo{font-size:5rem;line-height:1}
+.pic.noimg{background:linear-gradient(135deg,#f5f5f4,#e7e5e4)}
+.vbody{padding:1rem 1.1rem 1.3rem}
+.vword{font-size:2rem;font-weight:900;letter-spacing:.02em;line-height:1.2}
+.vpy{font-size:1rem;color:var(--muted);margin-top:.1rem;font-weight:600}
+.vhint{font-size:.85rem;color:#a8a29e;margin-top:.6rem;font-weight:600}
+.vback{display:none}
+.vcard.open .vfront{display:none}
+.vcard.open .vback{display:block}
+.vmean{font-size:1.1rem;margin-top:.2rem}
+.vex{font-size:.95rem;color:var(--muted);margin-top:.9rem;border-top:2px dashed var(--line);padding-top:.8rem}
+.vex b{color:var(--ink)}
+
+/* ---------- 配对 ---------- */
+.mwrap{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem}
+@media (min-width: 768px) {
+  .mwrap { gap: 1.5rem; margin-top: 1.5rem; }
+}
+@media (max-width: 620px) {
+  .mwrap { grid-template-columns:1fr; }
+}
+.mcol{display:flex;flex-direction:column;gap:.7rem}
+.mhead{font-size:.85rem;font-weight:800;color:var(--muted);letter-spacing:.08em}
+.mitem{
+  border:2px solid var(--line);border-radius:14px;padding:1rem 1.1rem;
+  background:#fff;cursor:pointer;font-size:1rem;transition:.15s;line-height:1.5;
+  touch-action:manipulation;
+}
+.mitem:active{transform:scale(.98)}
+.mitem.sel{background:#fef3c7;border-color:#f59e0b;box-shadow:0 0 0 4px rgba(245,158,11,.15)}
+.mitem.done{background:var(--green-s);border-color:#86efac;color:#166534;cursor:default}
+.mitem.bad{background:var(--rose-s);border-color:#fda4af;animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
+/* ---------- 句型 ---------- */
+.expr{
+  display:flex;gap:1rem;align-items:flex-start;
+  border:2px solid var(--line);border-radius:16px;background:#fff;
+  padding:1.2rem;margin-bottom:1rem;
+}
+@media (min-width: 768px) {
+  .expr { padding: 1.35rem; margin-bottom: 1.15rem; }
+}
+.num{
+  width:2.4rem;height:2.4rem;flex:0 0 2.4rem;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;font-weight:900;
+}
+.zh{font-size:1.35rem;font-weight:800;line-height:1.5}
+@media (min-width: 768px) {
+  .zh { font-size: 1.5rem; }
+}
+.py{font-size:.9rem;color:var(--muted);margin-top:.3rem}
+.note{font-size:.95rem;color:var(--muted);margin-top:.6rem;background:var(--soft);border-radius:10px;padding:.6rem .8rem}
+
+/* ---------- 填空 ---------- */
+.q{border:2px solid var(--line);border-radius:16px;padding:1.2rem;background:#fff;margin-bottom:1rem}
+.qtext{font-size:1.25rem;font-weight:700;margin-bottom:1rem;line-height:1.6}
+@media (min-width: 768px) {
+  .qtext { font-size: 1.35rem; }
+}
+.qnum{
+  display:inline-flex;width:1.8rem;height:1.8rem;border-radius:50%;
+  background:var(--ink);color:#fff;align-items:center;justify-content:center;
+  font-size:.9rem;margin-right:.6rem;vertical-align:middle;font-weight:800;
+}
+.opts{display:flex;gap:.7rem;flex-wrap:wrap}
+.opt{
+  font-family:inherit;font-size:1.1rem;font-weight:700;
+  padding:.7rem 1.4rem;min-height:56px;border:2px solid var(--line);
+  border-radius:14px;background:#fff;cursor:pointer;transition:.15s;touch-action:manipulation;
+}
+.opt:active{transform:scale(.97)}
+.opt.ok{background:var(--green-s);border-color:#86efac;color:#166534}
+.opt.bad{background:var(--rose-s);border-color:#fda4af;animation:shake .35s}
+
+/* ---------- 排序 ---------- */
+.order-list{display:flex;flex-direction:column;gap:.8rem;margin-top:1.2rem;user-select:none;-webkit-user-select:none}
+.o-item{
+  display:flex;gap:.8rem;align-items:center;
+  border:2px solid var(--line);border-radius:14px;background:#fff;
+  padding:.9rem 1rem;font-size:1.05rem;line-height:1.5;
+  transition:box-shadow .15s,background .15s;touch-action:manipulation;
+}
+.o-item .handle{
+  flex:0 0 auto;font-size:1.4rem;color:#a8a29e;cursor:grab;
+  padding:.2rem .5rem;touch-action:none;user-select:none;-webkit-user-select:none;
+}
+.o-item.dragging{
+  box-shadow:0 12px 30px rgba(0,0,0,.18);
+  background:#fef3c7;border-color:#f59e0b;z-index:10;position:relative;
+}
+.o-item.sel{background:var(--blue-s);border-color:var(--blue)}
+.o-item.correct{background:var(--green-s);border-color:#86efac}
+.o-item.wrong{background:var(--rose-s);border-color:#fda4af}
+.o-text b{font-weight:900}
+
+/* ---------- 抽卡 ---------- */
+.draw{
+  border:3px dashed #d6d3d1;border-radius:20px;padding:2.5rem 1.5rem;
+  text-align:center;margin:1.2rem 0;background:#fff;min-height:220px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.8rem;
+}
+.draw.show{border-style:solid;background:var(--amber-s);border-color:#f59e0b}
+.bigemoji{font-size:4rem;line-height:1}
+.drawtext{font-size:1.4rem;font-weight:800;line-height:1.5}
+
+/* ---------- 检查清单 ---------- */
+.check-item{
+  display:flex;gap:.9rem;align-items:center;padding:.9rem 1rem;
+  border-radius:12px;cursor:pointer;font-size:1.05rem;transition:.15s;
+  touch-action:manipulation;
+}
+.check-item:active{background:var(--soft)}
+.check-item .box{
+  width:1.7rem;height:1.7rem;flex:0 0 1.7rem;border:3px solid #d6d3d1;
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:1rem;color:transparent;font-weight:900;
+}
+.check-item.done .box{background:#86efac;border-color:#15803d;color:#14532d}
+.check-item.done{color:var(--muted)}
+
+/* ---------- 词条 ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:.8rem}
+.chip{background:var(--soft);border-radius:12px;padding:.6rem 1.1rem;font-size:1.1rem;font-weight:700}
+
+/* ---------- 角落翻页 ---------- */
+.pager{
+  position:fixed;left:16px;bottom:16px;z-index:9999;
+  display:flex;gap:.7rem;-webkit-transform:translateZ(0);transform:translateZ(0);
+}
+@supports (bottom:env(safe-area-inset-bottom)){
+  .pager{left:calc(16px + env(safe-area-inset-left));bottom:calc(16px + env(safe-area-inset-bottom))}
+}
+.pager button{
+  min-width:64px;height:56px;border-radius:28px;padding:0 1.1rem;
+  border:2px solid #a8a29e;background:#fff;
+  box-shadow:0 2px 10px rgba(0,0,0,.18);
+  color:var(--ink);font-family:inherit;font-size:1.5rem;font-weight:800;line-height:1;
+  opacity:.9;touch-action:manipulation;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+}
+.pager button:active{transform:scale(.93)}
+.pager button:disabled{opacity:.35}
+.center{text-align:center}
+.mt{margin-top:2rem}
+@media (max-width:520px){
+  .o-item{font-size:.95rem}
+}
+
+/* Return to the lesson collection. */
+.lesson-home{display:grid;place-items:center;flex:none;min-width:48px;min-height:48px;color:var(--ink);background:white;border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;text-decoration:none;touch-action:manipulation}.lesson-home:hover{background:#eff6e9}.lesson-home:focus-visible{outline:3px solid #26a9e0;outline-offset:3px}.bar .title{margin-right:auto}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="in">
+    <a class="lesson-home" href="../index.html#rental-original" aria-label="返回课程选择" title="返回课程选择"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="m3 10 9-7 9 7M5 9v12h5v-7h4v7h5V9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="title">🏠 租房任务</div>
+    <div class="meta"><span id="stars">⭐ 0</span> · <span id="pageno">1 / 10</span></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ============ 1 ============ -->
+<section class="page active" data-page="1">
+  <h1>🏠 任务：在北京租一套房子</h1>
+  <p class="sub">真实任务 · 60 分钟 · 全中文</p>
+
+  <div class="callout blue">
+    <span class="ico">🧳</span>
+    <div>你刚来北京工作，需要自己租一套房子。<br>你要找<b>中介</b>看房、谈<b>租金</b>、签<b>合同</b>，还要搞清楚<b>押金</b>和<b>水电费</b>。</div>
+  </div>
+
+  <h2>今天的三个任务</h2>
+  <div class="mission">
+    <div class="mcard" style="background:var(--amber-s)">
+      <div class="n">任务一</div>
+      <div class="t">🗝️ 认识 8 个租房词语</div>
+    </div>
+    <div class="mcard" style="background:var(--green-s)">
+      <div class="n">任务二</div>
+      <div class="t">💬 学会问租金、押金、合同</div>
+    </div>
+    <div class="mcard" style="background:var(--purple-s)">
+      <div class="n">任务三</div>
+      <div class="t">🎭 和中介完成一次看房对话</div>
+    </div>
+  </div>
+
+  <div class="callout amber">
+    <span class="ico">🕹️</span>
+    <div><b>怎么用：</b>电脑上按 <b>空格</b> 或 <b>← →</b> 翻页；iPad 上<b>左右滑动</b>翻页，也可以点右下角的 ← → 按钮。</div>
+  </div>
+
+  <div class="mt center"><button class="btn primary" onclick="go(2)">开始任务 →</button></div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="page" data-page="2">
+  <h1>🗝️ 词语武器库（一）</h1>
+  <p class="sub">先看图片，猜一猜意思，然后点卡片看答案。</p>
+  <div class="vgrid" id="vocabA"></div>
+  <div class="mt center"><button class="btn primary" onclick="go(3)">还有 4 个词 →</button></div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="page" data-page="3">
+  <h1>🗝️ 词语武器库（二）</h1>
+  <p class="sub">这 4 个词和"钱"和"时间"有关。</p>
+  <div class="vgrid" id="vocabB"></div>
+  <div class="mt center"><button class="btn primary" onclick="go(4)">去玩配对游戏 →</button></div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="page" data-page="4">
+  <h1>🎮 挑战一：配对游戏</h1>
+  <p class="sub">左边是"意思"，右边是"词语"。先点左边，再点右边。</p>
+
+  <div class="callout amber">
+    <span class="ico">🎯</span>
+    <div>第 <b id="roundNo">1</b> 轮 · 已配对 <b id="matchCount">0 / 4</b></div>
+  </div>
+
+  <div class="mwrap">
+    <div class="mcol">
+      <div class="mhead">意 思</div>
+      <div id="matchLeft" class="mcol"></div>
+    </div>
+    <div class="mcol">
+      <div class="mhead">词 语</div>
+      <div id="matchRight" class="mcol"></div>
+    </div>
+  </div>
+
+  <div class="mt center" id="nextRoundBox" style="display:none">
+    <button class="btn primary" onclick="nextMatchRound()">下一轮 →</button>
+  </div>
+  <div class="mt center"><button class="btn" onclick="go(5)">继续上课 →</button></div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="page" data-page="5">
+  <h1>💬 句型（一）：问房子</h1>
+  <p class="sub">看房的时候，你最需要问这三句。</p>
+
+  <div class="expr">
+    <span class="num" style="background:var(--amber-s)">1</span>
+    <div>
+      <div class="zh">我想租一套一居室，离地铁近一点。</div>
+      <div class="py">Wǒ xiǎng zū yī tào yījūshì, lí dìtiě jìn yīdiǎn.</div>
+      <div class="note">💡 <b>一居室</b> = 一个卧室的房子。<b>一套</b> 是房子的量词。</div>
+    </div>
+  </div>
+
+  <div class="expr">
+    <span class="num" style="background:var(--blue-s)">2</span>
+    <div>
+      <div class="zh">房租一个月多少钱？包含物业费吗？</div>
+      <div class="py">Fángzū yī gè yuè duōshao qián? Bāohán wùyèfèi ma?</div>
+      <div class="note">💡 <b>包含</b> = 这个价钱里面有没有……</div>
+    </div>
+  </div>
+
+  <div class="expr">
+    <span class="num" style="background:var(--green-s)">3</span>
+    <div>
+      <div class="zh">押金是押一付三吗？</div>
+      <div class="py">Yājīn shì yā yī fù sān ma?</div>
+      <div class="note">💡 <b>押一付三</b> = 交 1 个月押金，一次付 3 个月房租。中国租房最常见的说法。</div>
+    </div>
+  </div>
+
+  <div class="mt center"><button class="btn primary" onclick="go(6)">还有三句 →</button></div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="page" data-page="6">
+  <h1>💬 句型（二）：问费用和合同</h1>
+  <p class="sub">这三句帮你搞清楚"要花多少钱"和"能不能走"。</p>
+
+  <div class="expr">
+    <span class="num" style="background:var(--purple-s)">4</span>
+    <div>
+      <div class="zh">水电费怎么算？</div>
+      <div class="py">Shuǐdiànfèi zěnme suàn?</div>
+      <div class="note">💡 回答常常是 <b>按表算</b>：用了多少就交多少。</div>
+    </div>
+  </div>
+
+  <div class="expr">
+    <span class="num" style="background:var(--rose-s)">5</span>
+    <div>
+      <div class="zh">合同可以签一年吗？</div>
+      <div class="py">Hétong kěyǐ qiān yī nián ma?</div>
+      <div class="note">💡 <b>签合同</b> = 在合同上写名字，表示同意。</div>
+    </div>
+  </div>
+
+  <div class="expr">
+    <span class="num" style="background:var(--amber-s)">6</span>
+    <div>
+      <div class="zh">如果我提前退租，押金能退吗？</div>
+      <div class="py">Rúguǒ wǒ tíqián tuìzū, yājīn néng tuì ma?</div>
+      <div class="note">💡 <b>提前</b> = 比说好的时间早。<b>退</b> = 把钱还给你。</div>
+    </div>
+  </div>
+
+  <div class="mt center"><button class="btn primary" onclick="go(7)">做个小练习 →</button></div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="page" data-page="7">
+  <h1>✏️ 挑战二：选一选</h1>
+  <p class="sub">每道题选一个最合适的词。</p>
+  <div id="fillWrap"></div>
+  <div class="mt center"><button class="btn primary" onclick="go(8)">去排对话 →</button></div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="page" data-page="8">
+  <h1>🔀 挑战三：把对话排好队</h1>
+  <p class="sub">这是中介和租客的对话，顺序乱了。用手指<b>拖动 ⠿ 手柄</b>把句子排好。</p>
+
+  <div class="callout blue">
+    <span class="ico">💡</span>
+    <div>不想拖？也可以<b>先点一句，再点另一句</b>，两句就会交换位置。</div>
+  </div>
+
+  <div id="orderList" class="order-list"></div>
+
+  <div class="mt center"><button class="btn" onclick="checkOrder(true)">✅ 检查顺序</button></div>
+  <div id="orderMsg" class="mt"></div>
+
+  <div class="mt center"><button class="btn primary" onclick="go(9)">终极任务 →</button></div>
+</section>
+
+<!-- ============ 9 ============ -->
+<section class="page" data-page="9">
+  <h1>🎭 终极任务：角色扮演</h1>
+  <p class="sub">抽一张卡片，你是租客，老师是中介。</p>
+
+  <div class="draw" id="drawCard">
+    <div class="bigemoji">🎲</div>
+    <div class="drawtext">点下面的按钮，抽一张卡片</div>
+  </div>
+  <div class="center"><button class="btn" id="drawBtn">🎲 抽一张</button></div>
+
+  <h2>🗣️ 你可以这样说</h2>
+  <div class="callout green">
+    <span class="ico">💬</span>
+    <div>
+      你好，我想租一套 <b>＿＿＿</b>，离地铁近一点。<br>
+      房租一个月多少钱？包含物业费吗？<br>
+      押金是押一付三吗？水电费怎么算？<br>
+      合同可以签一年吗？好的，谢谢您！
+    </div>
+  </div>
+
+  <h2>📋 检查清单</h2>
+  <div>
+    <div class="check-item"><span class="box">✓</span><span>① 我说了想租什么样的房子</span></div>
+    <div class="check-item"><span class="box">✓</span><span>② 我问了租金</span></div>
+    <div class="check-item"><span class="box">✓</span><span>③ 我问了押金怎么付</span></div>
+    <div class="check-item"><span class="box">✓</span><span>④ 我问了水电费和物业费</span></div>
+    <div class="check-item"><span class="box">✓</span><span>⑤ 我问了合同和退租</span></div>
+  </div>
+
+  <div class="mt center"><button class="btn primary" onclick="go(10)">看看今天学了什么 →</button></div>
+</section>
+
+<!-- ============ 10 ============ -->
+<section class="page" data-page="10">
+  <h1>🏆 任务完成！</h1>
+  <p class="sub">你现在可以自己去北京租房子了。</p>
+
+  <h2>🗝️ 八个词语</h2>
+  <div class="chips">
+    <span class="chip">💰 押金</span>
+    <span class="chip">📄 合同</span>
+    <span class="chip">🤝 中介</span>
+    <span class="chip">💵 租金</span>
+    <span class="chip">⚡ 水电费</span>
+    <span class="chip">🏢 物业费</span>
+    <span class="chip">📅 租期</span>
+    <span class="chip">📦 退租</span>
+  </div>
+
+  <h2>💬 六个句子</h2>
+  <div class="exprs">
+    <div class="expr"><div><div class="zh">我想租一套一居室，离地铁近一点。</div></div></div>
+    <div class="expr"><div><div class="zh">房租一个月多少钱？包含物业费吗？</div></div></div>
+    <div class="expr"><div><div class="zh">押金是押一付三吗？</div></div></div>
+    <div class="expr"><div><div class="zh">水电费怎么算？</div></div></div>
+    <div class="expr"><div><div class="zh">合同可以签一年吗？</div></div></div>
+    <div class="expr"><div><div class="zh">如果我提前退租，押金能退吗？</div></div></div>
+  </div>
+
+  <h2>💡 教师带走</h2>
+  <div class="callout amber"><span class="ico">1</span><div><b>词卡先猜后翻</b>：让学生看图片猜意思，猜错也没关系，记忆更深。</div></div>
+  <div class="callout amber"><span class="ico">2</span><div><b>配对游戏可以换城市</b>：把"北京"换成莫斯科、上海，让学生更有代入感。</div></div>
+  <div class="callout amber"><span class="ico">3</span><div><b>排序游戏可以反着用</b>：让学生自己编一段租房对话，再打乱给同伴排。</div></div>
+  <div class="callout amber"><span class="ico">4</span><div><b>押一付三</b> 是文化点，可以展开讲中国的租房习惯，学生教成人时很受欢迎。</div></div>
+  <div class="callout amber"><span class="ico">5</span><div><b>角色扮演抽两次</b>：第二次可以换成"押金太贵，想砍价"，难度更高。</div></div>
+
+  <div class="mt center"><button class="btn primary" onclick="location.reload()">🔄 再来一次</button></div>
+</section>
+
+</main>
+
+<div class="pager">
+  <button id="prev" onclick="go(cur-1)" aria-label="上一页">←</button>
+  <button id="next" onclick="go(cur+1)" aria-label="下一页">→</button>
+</div>
+
+<script>
+/* ================= 数据 ================= */
+const IMG = f => "https://commons.wikimedia.org/wiki/Special:FilePath/" + f + "?width=800";
+
+const VOCAB_A = [
+  {w:"押金", p:"yā jīn", emo:"💰", img:IMG("Money.jpg"),
+   m:"租房前先交给房东的一笔钱，退租的时候会还给你。",
+   ex:"押金是押一付三吗？"},
+  {w:"合同", p:"hé tong", emo:"📄", img:IMG("Contract.jpg"),
+   m:"一张纸，上面写清楚租金、租期和每个人的责任。",
+   ex:"合同可以签一年吗？"},
+  {w:"中介", p:"zhōng jiè", emo:"🤝", img:IMG("Real estate agent.jpg"),
+   m:"帮你找房子的人或者公司。找他们要付中介费。",
+   ex:"我找了一家中介。"},
+  {w:"租金", p:"zū jīn", emo:"💵", img:IMG("Rent.jpg"),
+   m:"每个月交给房东的钱，也叫房租。",
+   ex:"租金一个月五千。"}
+];
+
+const VOCAB_B = [
+  {w:"水电费", p:"shuǐ diàn fèi", emo:"⚡", img:IMG("Electricity meter.jpg"),
+   m:"用多少水、多少电，就交多少钱。",
+   ex:"水电费怎么算？"},
+  {w:"物业费", p:"wù yè fèi", emo:"🏢", img:IMG("Apartment building.jpg"),
+   m:"交给小区管理的钱，用来打扫、保安、修电梯。",
+   ex:"房租包含物业费吗？"},
+  {w:"租期", p:"zū qī", emo:"📅", img:IMG("Calendar.jpg"),
+   m:"合同有效的时间，比如一年、两年。",
+   ex:"租期是一年。"},
+  {w:"退租", p:"tuì zū", emo:"📦", img:IMG("Moving boxes.jpg"),
+   m:"不住了，把房子还给房东。",
+   ex:"我下个月退租。"}
+];
+
+const MATCH_ROUNDS = [
+  [
+    {id:"dep",  d:"签合同前先付的一笔钱，退租时还给你", w:"押金"},
+    {id:"con",  d:"写清楚租金、租期和责任的纸",         w:"合同"},
+    {id:"mid",  d:"帮你找房子的人或公司",               w:"中介"},
+    {id:"rent", d:"每个月交给房东的钱",                 w:"租金"}
+  ],
+  [
+    {id:"util", d:"用了多少就交多少，和表有关",   w:"水电费"},
+    {id:"prop", d:"交给小区管理、用来打扫和保安", w:"物业费"},
+    {id:"term", d:"合同有效的时间",               w:"租期"},
+    {id:"out",  d:"不住了，把房子还给房东",       w:"退租"}
+  ]
+];
+
+const FILL = [
+  {q:"我想租一套一居室，离地铁____一点。", opts:["近","贵","远"], a:"近"},
+  {q:"房租一个月多少钱？____物业费吗？",   opts:["包含","退","签"], a:"包含"},
+  {q:"押金是押一____三吗？",               opts:["付","租","算"], a:"付"},
+  {q:"如果我提前____，押金能退吗？",       opts:["退租","签合同","搬家"], a:"退租"}
+];
+
+const DIALOG = [
+  {id:1, who:"中介", s:"你好！请问你想租什么样的房子？"},
+  {id:2, who:"租客", s:"我想租一套一居室，离地铁近一点。"},
+  {id:3, who:"中介", s:"这套不错，房租一个月五千，包含物业费。"},
+  {id:4, who:"租客", s:"押金是押一付三吗？水电费怎么算？"},
+  {id:5, who:"中介", s:"对，押一付三。水电费按表算。"},
+  {id:6, who:"租客", s:"好的，合同可以签一年吗？"}
+];
+
+const PROBLEMS = [
+  {e:"🏠", t:"你想租一居室，问租金和押金"},
+  {e:"🚇", t:"房子离地铁太远，问有没有近一点的"},
+  {e:"⚡", t:"问水电费和物业费怎么算"},
+  {e:"📄", t:"问合同能签多久，能不能提前退租"},
+  {e:"💰", t:"押金太贵了，问能不能少一点"},
+  {e:"📦", t:"住了一年想退租，问押金怎么退"}
+];
+
+/* ================= 基础 ================= */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const TOTAL = 10;
+let cur = 1, stars = 0, dragging = false;
+
+function go(n){
+  cur = Math.max(1, Math.min(TOTAL, n));
+  $$('.page').forEach(p => p.classList.toggle('active', +p.dataset.page === cur));
+  $('#pageno').textContent = cur + ' / ' + TOTAL;
+  $('#prev').disabled = cur === 1;
+  $('#next').disabled = cur === TOTAL;
+  window.scrollTo({top:0, behavior:'instant'});
+}
+function addStar(n=1){
+  stars += n;
+  $('#stars').textContent = '⭐ ' + stars;
+}
+
+/* 键盘 */
+document.addEventListener('keydown', e => {
+  const t = e.target;
+  if(t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+  if(e.code === 'Space' || e.key === 'ArrowRight'){
+    e.preventDefault(); go(cur + 1);
+  } else if(e.key === 'ArrowLeft'){
+    e.preventDefault(); go(cur - 1);
+  }
+});
+
+/* 滑动翻页 */
+let tsX=0, tsY=0, tsT=0;
+document.addEventListener('touchstart', e => {
+  if(e.touches.length !== 1) return;
+  if(e.target.closest('.order-list')) return;
+  tsX = e.touches[0].clientX;
+  tsY = e.touches[0].clientY;
+  tsT = Date.now();
+}, {passive:true});
+
+document.addEventListener('touchend', e => {
+  if(dragging) return;
+  const dx = e.changedTouches[0].clientX - tsX;
+  const dy = e.changedTouches[0].clientY - tsY;
+  const dt = Date.now() - tsT;
+  if(dt < 700 && Math.abs(dx) > 80 && Math.abs(dy) < 60){
+    dx < 0 ? go(cur + 1) : go(cur - 1);
+  }
+}, {passive:true});
+
+/* ================= 词卡 ================= */
+function picHTML(v){
+  return `<div class="pic">
+    <img src="${v.img}" alt="${v.w}" loading="eager"
+         onerror="picFallback(this,'${v.emo}')">
+    <span class="emo" style="display:none">${v.emo}</span>
+  </div>`;
+}
+function picFallback(img, emo){
+  const p = img.parentElement;
+  img.style.display = 'none';
+  p.classList.add('noimg');
+  const s = p.querySelector('.emo');
+  if(s) s.style.display = 'block';
+}
+function renderVocab(el, list){
+  el.innerHTML = '';
+  list.forEach(v => {
+    const c = document.createElement('div');
+    c.className = 'vcard';
+    c.innerHTML = `
+      <div class="vfront">
+        ${picHTML(v)}
+        <div class="vbody">
+          <div class="vword">${v.w}</div>
+          <div class="vpy">${v.p}</div>
+          <div class="vhint">👆 点一下看意思</div>
+        </div>
+      </div>
+      <div class="vback">
+        ${picHTML(v)}
+        <div class="vbody">
+          <div class="vword" style="font-size:1.5rem">${v.w}</div>
+          <div class="vpy">${v.p}</div>
+          <div class="vmean">${v.m}</div>
+          <div class="vex">例：<b>${v.ex}</b></div>
+        </div>
+      </div>`;
+    c.onclick = () => c.classList.toggle('open');
+    el.appendChild(c);
+  });
+}
+renderVocab($('#vocabA'), VOCAB_A);
+renderVocab($('#vocabB'), VOCAB_B);
+
+/* ================= 配对游戏 ================= */
+let mRound = 0, mSel = null, mDone = 0;
+
+function renderMatch(){
+  const pairs = MATCH_ROUNDS[mRound];
+  mSel = null; mDone = 0;
+  $('#roundNo').textContent = mRound + 1;
+  $('#matchCount').textContent = '0 / 4';
+  $('#nextRoundBox').style.display = 'none';
+
+  const L = $('#matchLeft'), R = $('#matchRight');
+  L.innerHTML = ''; R.innerHTML = '';
+
+  pairs.forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'mitem'; d.dataset.id = p.id; d.textContent = p.d;
+    d.onclick = () => {
+      if(d.classList.contains('done')) return;
+      if(mSel) mSel.classList.remove('sel');
+      mSel = d; d.classList.add('sel');
+    };
+    L.appendChild(d);
+  });
+
+  [...pairs].sort(() => Math.random() - .5).forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'mitem'; d.dataset.id = p.id; d.textContent = p.w;
+    d.onclick = () => {
+      if(d.classList.contains('done')) return;
+      if(!mSel){ d.classList.add('bad'); setTimeout(()=>d.classList.remove('bad'),400); return; }
+      if(d.dataset.id === mSel.dataset.id){
+        mSel.classList.remove('sel');
+        mSel.classList.add('done');
+        d.classList.add('done');
+        mSel = null; mDone++;
+        $('#matchCount').textContent = mDone + ' / 4';
+        if(mDone === 4){
+          addStar();
+          $('#matchCount').textContent = '4 / 4 🎉';
+          if(mRound < MATCH_ROUNDS.length - 1){
+            $('#nextRoundBox').style.display = 'block';
+          } else {
+            $('#nextRoundBox').style.display = 'block';
+            $('#nextRoundBox').querySelector('button').textContent = '全部完成 🎉';
+            $('#nextRoundBox').querySelector('button').onclick = () => go(5);
+          }
+        }
+      } else {
+        d.classList.add('bad');
+        setTimeout(()=>d.classList.remove('bad'),400);
+      }
+    };
+    R.appendChild(d);
+  });
+}
+function nextMatchRound(){ mRound++; renderMatch(); }
+renderMatch();
+
+/* ================= 填空 ================= */
+let fillDone = 0;
+FILL.forEach((f, i) => {
+  const q = document.createElement('div');
+  q.className = 'q';
+  const opts = f.opts.map(o => `<button class="opt" data-ok="${o === f.a}">${o}</button>`).join('');
+  q.innerHTML = `<div class="qtext"><span class="qnum">${i+1}</span>${f.q}</div><div class="opts">${opts}</div>`;
+  q.querySelectorAll('.opt').forEach(b => {
+    b.onclick = () => {
+      if(b.classList.contains('ok')) return;
+      if(b.dataset.ok === 'true'){
+        b.classList.add('ok');
+        q.querySelectorAll('.opt').forEach(x => x.disabled = true);
+        fillDone++;
+        if(fillDone === FILL.length) addStar();
+      } else {
+        b.classList.add('bad');
+        setTimeout(()=>b.classList.remove('bad'),400);
+      }
+    };
+  });
+  $('#fillWrap').appendChild(q);
+});
+
+/* ================= 拖拽排序 ================= */
+const ORDER_CORRECT = [1,2,3,4,5,6];
+const list = $('#orderList');
+let dragEl = null, startY = 0, tapSel = null;
+
+function buildOrder(){
+  list.innerHTML = '';
+  [...DIALOG].sort(() => Math.random() - .5).forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'o-item';
+    el.dataset.id = d.id;
+    el.innerHTML = `<span class="handle">⠿</span>
+      <span class="o-text"><b>${d.who}：</b>${d.s}</span>`;
+    el.onclick = e => {
+      if(e.target.closest('.handle')) return;
+      if(!tapSel){ tapSel = el; el.classList.add('sel'); return; }
+      if(tapSel === el){ el.classList.remove('sel'); tapSel = null; return; }
+      const a = tapSel, b = el;
+      const ph = document.createElement('div');
+      list.insertBefore(ph, a);
+      list.insertBefore(a, b);
+      list.insertBefore(b, ph);
+      ph.remove();
+      a.classList.remove('sel');
+      tapSel = null;
+      clearOrderMark();
+    };
+    list.appendChild(el);
+  });
+}
+function clearOrderMark(){
+  $$('#orderList .o-item').forEach(x => x.classList.remove('correct','wrong'));
+}
+buildOrder();
+
+document.addEventListener('pointerdown', e => {
+  const h = e.target.closest('#orderList .handle');
+  if(!h) return;
+  e.preventDefault();
+  dragEl = h.parentElement;
+  startY = e.clientY;
+  dragEl.classList.add('dragging');
+  dragging = true;
+});
+
+document.addEventListener('pointermove', e => {
+  if(!dragEl) return;
+  e.preventDefault();
+  dragEl.style.transform = `translateY(${e.clientY - startY}px)`;
+
+  const r = dragEl.getBoundingClientRect();
+  const mid = r.top + r.height / 2;
+
+  const next = dragEl.nextElementSibling;
+  if(next){
+    const nr = next.getBoundingClientRect();
+    if(mid > nr.top + nr.height / 2){
+      list.insertBefore(next, dragEl);
+      startY = e.clientY;
+      dragEl.style.transform = 'none';
+      return;
+    }
+  }
+  const prev = dragEl.previousElementSibling;
+  if(prev){
+    const pr = prev.getBoundingClientRect();
+    if(mid < pr.top + pr.height / 2){
+      list.insertBefore(dragEl, prev);
+      startY = e.clientY;
+      dragEl.style.transform = 'none';
+    }
+  }
+}, {passive:false});
+
+document.addEventListener('pointerup', () => {
+  if(!dragEl) return;
+  dragEl.classList.remove('dragging');
+  dragEl.style.transform = 'none';
+  dragEl = null;
+  dragging = false;
+  clearOrderMark();
+});
+
+function checkOrder(showMsg){
+  const items = $$('#orderList .o-item');
+  let ok = 0;
+  items.forEach((el, i) => {
+    const right = +el.dataset.id === ORDER_CORRECT[i];
+    if(right) ok++;
+    if(showMsg){
+      el.classList.toggle('correct', right);
+      el.classList.toggle('wrong', !right);
+    }
+  });
+  if(!showMsg) return;
+  const msg = $('#orderMsg');
+  if(ok === items.length){
+    msg.innerHTML = '<div class="callout green"><span class="ico">🎉</span><div>完全正确！这就是一次完整的看房对话。</div></div>';
+    addStar();
+  } else {
+    msg.innerHTML = `<div class="callout rose"><span class="ico">🤔</span><div>对了 <b>${ok}</b> / ${items.length} 句。绿色的位置是对的，红色的再想一想。</div></div>`;
+  }
+}
+
+/* ================= 角色扮演 ================= */
+$('#drawBtn').onclick = () => {
+  const p = PROBLEMS[Math.floor(Math.random() * PROBLEMS.length)];
+  const c = $('#drawCard');
+  c.classList.add('show');
+  c.innerHTML = `<div class="bigemoji">${p.e}</div><div class="drawtext">${p.t}</div>`;
+};
+
+/* ================= 检查清单 ================= */
+$$('.check-item').forEach(c => {
+  c.onclick = () => c.classList.toggle('done');
+});
+
+/* ================= 启动 ================= */
+go(1);
+</script>
+</body>
+</html>
