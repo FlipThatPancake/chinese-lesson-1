@@ -839,6 +839,7 @@
     }
   ];
   let currentQuiz = 0;
+  let quizStarted = false;
 
   function goTo(page) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -847,7 +848,7 @@
     document.getElementById('progress').style.width = (page / totalPages * 100) + '%';
     document.getElementById('pageIndicator').textContent = page + ' / ' + totalPages;
     
-    if (page === 5 && currentQuiz === 0) showQuiz(0);
+    if (page === 5 && !quizStarted) { quizStarted = true; showQuiz(0); }
     if (page === 9) calculateFinal();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -897,11 +898,12 @@
       const fb = document.getElementById('matchFeedback');
       fb.textContent = '❌ 不对哦，再试一次！';
       fb.className = 'feedback show bad';
+      const badLeft = selectedLeft, badRight = selectedRight;
       setTimeout(() => {
-        selectedLeft.classList.remove('selected', 'wrong');
-        selectedRight.classList.remove('selected', 'wrong');
-        selectedLeft = null;
-        selectedRight = null;
+        badLeft.classList.remove('selected', 'wrong');
+        badRight.classList.remove('selected', 'wrong');
+        if (selectedLeft === badLeft) selectedLeft = null;
+        if (selectedRight === badRight) selectedRight = null;
         fb.classList.remove('show');
       }, 800);
       return;
@@ -1013,7 +1015,9 @@
   // SMS
   function answerSms(btn, isCorrect, qNum) {
     const parent = btn.parentElement;
-    parent.querySelectorAll('.quiz-option').forEach(o => o.classList.add('disabled'));
+    const sameQuestion = Array.from(parent.querySelectorAll('.quiz-option'))
+      .filter(o => o.getAttribute('onclick').endsWith(',' + qNum + ')'));
+    sameQuestion.forEach(o => o.classList.add('disabled'));
     
     const fb = document.getElementById('smsFb' + qNum);
     if (isCorrect) {
@@ -1024,7 +1028,7 @@
       fb.className = 'feedback show good';
     } else {
       btn.classList.add('wrong');
-      parent.querySelectorAll('.quiz-option').forEach(o => {
+      sameQuestion.forEach(o => {
         if (o.onclick.toString().includes('true')) o.classList.add('correct');
       });
       fb.textContent = '❌ 再看一遍短信';
