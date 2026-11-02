@@ -786,7 +786,7 @@
 
     <div class="nav-btns">
       <button class="btn btn-secondary" onclick="goTo(8)">← 返回</button>
-      <button class="btn btn-primary" onclick="goTo(1)">重新开始 🔄</button>
+      <button class="btn btn-primary" onclick="location.reload()">重新开始 🔄</button>
     </div>
   </div>
 </div>
@@ -933,6 +933,7 @@
   }
 
   function answerQuiz(btn, isCorrect) {
+    if (btn.classList.contains('disabled')) return;
     const options = document.querySelectorAll('#quizContent .quiz-option');
     options.forEach(o => o.classList.add('disabled'));
     
@@ -1014,6 +1015,7 @@
 
   // SMS
   function answerSms(btn, isCorrect, qNum) {
+    if (btn.classList.contains('disabled')) return;
     const parent = btn.parentElement;
     const sameQuestion = Array.from(parent.querySelectorAll('.quiz-option'))
       .filter(o => o.getAttribute('onclick').endsWith(',' + qNum + ')'));
@@ -1038,6 +1040,7 @@
 
   // Role play
   function rolePlay(btn, isCorrect, taskNum) {
+    if (btn.classList.contains('disabled')) return;
     const options = btn.parentElement.querySelectorAll('.quiz-option');
     options.forEach(o => o.classList.add('disabled'));
     
