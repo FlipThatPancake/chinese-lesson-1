@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生存中文：外卖配送与快递到家</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --card: #f7f6f3;
+    --accent: #2eaadc;
+    --accent2: #0f7b6c;
+    --accent3: #eb5757;
+    --text: #37352f;
+    --muted: #787774;
+    --border: #e9e9e7;
+    --success: #0f7b6c;
+    --warning: #d9730d;
+    --purple: #6940a5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: #fbfbfa;
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  .app {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 20px 16px 80px;
+  }
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 12px 0;
+  }
+  .logo {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent2);
+  }
+  .progress-wrap {
+    flex: 1;
+    margin: 0 14px;
+    height: 8px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    width: 11%;
+    transition: width 0.4s ease;
+  }
+  .page-indicator {
+    font-size: 0.85rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .page {
+    display: none;
+    animation: fadeIn 0.35s ease;
+  }
+  .page.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card.highlight {
+    background: linear-gradient(135deg, #fff7ed, #fef3c7);
+    border-color: #fde68a;
+  }
+  h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-size: 1.2rem;
+    font-weight: 650;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 14px 0 8px;
+  }
+  p { margin-bottom: 12px; }
+  .muted { color: var(--muted); font-size: 0.95rem; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn-primary {
+    background: var(--accent2);
+    color: white;
+  }
+  .btn-primary:hover { background: #0a5c52; transform: translateY(-1px); }
+  .btn-secondary {
+    background: white;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--card); }
+  .btn-accent {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-accent:hover { background: #1a8bb8; }
+  .btn-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+  .nav-btns {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 26px;
+    gap: 12px;
+  }
+  .word-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .word-card {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    user-select: none;
+  }
+  .word-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .word-card.flipped {
+    background: linear-gradient(135deg, #e6f7f5, #f0f9ff);
+    border-color: var(--accent2);
+  }
+  .word-card .hanzi {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .word-card .meaning {
+    font-size: 0.8rem;
+    color: var(--muted);
+    display: none;
+    line-height: 1.35;
+  }
+  .word-card.flipped .meaning { display: block; color: var(--accent2); font-weight: 500; }
+  .match-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  @media (max-width: 520px) {
+    .match-area { grid-template-columns: 1fr; }
+  }
+  .match-item {
+    padding: 13px 14px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    font-weight: 500;
+    transition: all 0.2s;
+    background: white;
+    font-size: 0.92rem;
+  }
+  .match-item:hover { border-color: var(--accent); }
+  .match-item.selected {
+    border-color: var(--accent);
+    background: #e8f6fc;
+  }
+  .match-item.correct {
+    border-color: var(--success);
+    background: #e6f7f5;
+    pointer-events: none;
+  }
+  .match-item.wrong {
+    border-color: var(--accent3);
+    background: #fdecea;
+    animation: shake 0.4s;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  .quiz-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 13px 16px;
+    margin: 8px 0;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    line-height: 1.4;
+  }
+  .quiz-option:hover { border-color: var(--accent); background: #f8fcff; }
+  .quiz-option.correct {
+    border-color: var(--success);
+    background: #e6f7f5;
+  }
+  .quiz-option.wrong {
+    border-color: var(--accent3);
+    background: #fdecea;
+  }
+  .quiz-option.disabled { pointer-events: none; }
+  .score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff7e6;
+    color: #d9730d;
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .feedback {
+    margin-top: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.good { background: #e6f7f5; color: var(--success); }
+  .feedback.bad { background: #fdecea; color: var(--accent3); }
+  .dialogue-box {
+    background: #f7f6f3;
+    border-radius: 12px;
+    padding: 14px;
+    margin: 12px 0;
+  }
+  .bubble {
+    max-width: 92%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    margin: 8px 0;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+  .bubble.left {
+    background: white;
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+  }
+  .tag {
+    display: inline-block;
+    background: #e8f6fc;
+    color: var(--accent);
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  .tag.green { background: #e6f7f5; color: var(--accent2); }
+  .tag.orange { background: #fff7e6; color: #d9730d; }
+  .tag.red { background: #fdecea; color: var(--accent3); }
+  .tip {
+    background: #fff9eb;
+    border-left: 4px solid #f5a623;
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 0.95rem;
+  }
+  .sms-box {
+    background: #1a1a1a;
+    color: #e5e5e5;
+    border-radius: 14px;
+    padding: 16px 18px;
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 14px 0;
+  }
+  .sms-box .sender {
+    color: #34c759;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .fill-blank {
+    display: inline-block;
+    min-width: 70px;
+    border-bottom: 2px dashed var(--accent);
+    text-align: center;
+    padding: 0 6px;
+    margin: 0 2px;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+  .fill-item {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 10px 0;
+    font-size: 0.95rem;
+  }
+  .choice-btn {
+    display: inline-block;
+    margin: 4px 6px 4px 0;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    background: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .choice-btn:hover { border-color: var(--accent); }
+  .choice-btn.selected {
+    border-color: var(--accent);
+    background: #e8f6fc;
+  }
+  .choice-btn.correct {
+    border-color: var(--success);
+    background: #e6f7f5;
+  }
+  .choice-btn.wrong {
+    border-color: var(--accent3);
+    background: #fdecea;
+  }
+  .big-score {
+    text-align: center;
+    padding: 28px 20px;
+  }
+  .big-score .number {
+    font-size: 3.4rem;
+    font-weight: 800;
+    color: var(--accent2);
+    line-height: 1;
+  }
+  .stars {
+    font-size: 1.9rem;
+    margin: 12px 0;
+  }
+  .celebrate {
+    text-align: center;
+    font-size: 2.4rem;
+    margin: 8px 0;
+  }
+  .app-phrase {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0;
+  }
+  .phrase-chip {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    color: #0369a1;
+    padding: 6px 12px;
+    border-radius: 99px;
+    font-size: 0.88rem;
+    font-weight: 500;
+  }
+  .lesson-home{display:grid;place-items:center;flex:none;width:40px;height:40px;border:1px solid var(--border);border-radius:10px;color:var(--text);background:#fff;text-decoration:none}
+  .lesson-home:hover{background:var(--card)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <a class="lesson-home" href="../index.html#waimai-kuaidi" aria-label="返回课程选择" title="返回课程选择"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="m3 10 9-7 9 7M5 9v12h5v-7h4v7h5V9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <div class="logo" style="margin-left:12px">🛵 外卖·快递</div>
+    <div class="progress-wrap"><div class="progress-bar" id="progress"></div></div>
+    <div class="page-indicator" id="pageIndicator">1 / 9</div>
+  </div>
+
+  <!-- PAGE 1: 欢迎 -->
+  <div class="page active" id="page1">
+    <div class="card highlight">
+      <h1>🛵 外卖配送与快递到家</h1>
+      <p class="muted">生存中文 · 每天都要用的实用口语</p>
+      <div style="margin-top:16px;">
+        <span class="tag green">HSK4+</span>
+        <span class="tag">60分钟</span>
+        <span class="tag orange">纯中文</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🎯 今天的目标</h2>
+      <p>学完这节课，你能：</p>
+      <ul style="padding-left:20px; margin:12px 0;">
+        <li>熟练点外卖并写清楚备注</li>
+        <li>处理快递柜取件和改放地点</li>
+        <li>在外卖洒了或快递损坏时正确申请退款/赔偿</li>
+      </ul>
+      <div class="tip">
+        💡 在中国生活，美团、饿了么、顺丰、菜鸟是每天都会用到的服务。我们一起把这些句子练熟！
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <div></div>
+      <button class="btn btn-primary" onclick="goTo(2)">开始学习 →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 2: 生词 -->
+  <div class="page" id="page2">
+    <div class="card">
+      <h2>📚 核心词汇（点击翻转看意思）</h2>
+      <p class="muted">共 8 个重点词，点击卡片查看释义</p>
+      
+      <div class="word-grid">
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">外卖</div>
+          <div class="meaning">打包带走或送上门的餐食服务</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">快递</div>
+          <div class="meaning">包裹快速邮寄服务</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">备注</div>
+          <div class="meaning">下单时的特殊说明或要求</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">配送</div>
+          <div class="meaning">把商品或食物送到指定地点</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">快递柜</div>
+          <div class="meaning">自助存取包裹的智能储物柜</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">取件码</div>
+          <div class="meaning">取包裹时输入的数字验证码</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">赔偿 / 退款</div>
+          <div class="meaning">损坏或延误后的金额补偿</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">差评</div>
+          <div class="meaning">对服务或产品的负面评价</div>
+        </div>
+      </div>
+      
+      <div class="tip">
+        ✨ 小提示：中国很多小区不让外卖员上楼，所以「快递柜」和「取件码」特别重要！
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="goTo(1)">← 上一页</button>
+      <button class="btn btn-primary" onclick="goTo(3)">下一页 →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 3: 实用表达 -->
+  <div class="page" id="page3">
+    <div class="card">
+      <h2>💬 实用高频句型</h2>
+      <p class="muted">直接能用的真实对话</p>
+    </div>
+
+    <div class="card">
+      <h3>🍜 点外卖 + 写备注</h3>
+      <div class="dialogue-box">
+        <div class="bubble left">师傅您好，我已经下单了。麻烦帮我备注一下：微辣、不要放香菜，送到后请直接打我电话。</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📦 改放地点 / 快递柜</h3>
+      <div class="dialogue-box">
+        <div class="bubble left">师傅您好，我现在不在家，麻烦您把包裹放进小区的快递柜，短信发我取件码，谢谢！</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>💢 售后维权</h3>
+      <div class="dialogue-box">
+        <div class="bubble left">你好，我收到的汤完全洒了，盒饭也湿透了无法食用，请问怎么申请退款或赔偿？</div>
+      </div>
+    </div>
+
+    <div class="card highlight">
+      <h3>📱 常用备注短语</h3>
+      <div class="app-phrase">
+        <span class="phrase-chip">微辣</span>
+        <span class="phrase-chip">中辣</span>
+        <span class="phrase-chip">特辣</span>
+        <span class="phrase-chip">不放辣</span>
+        <span class="phrase-chip">不放香菜</span>
+        <span class="phrase-chip">不放葱姜</span>
+        <span class="phrase-chip">酱汁分开放</span>
+        <span class="phrase-chip">放门口</span>
+        <span class="phrase-chip">放前台</span>
+        <span class="phrase-chip">放快递柜</span>
+        <span class="phrase-chip">无接触配送</span>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="goTo(2)">← 上一页</button>
+      <button class="btn btn-primary" onclick="goTo(4)">开始游戏 →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 4: 配对游戏 -->
+  <div class="page" id="page4">
+    <div class="card">
+      <h2>🎮 游戏1：词汇配对</h2>
+      <p class="muted">点击左边和右边对应的内容，全部配对成功即可过关</p>
+      <div style="margin:10px 0;">
+        <span class="score-badge">⭐ 得分：<span id="matchScore">0</span> / 8</span>
+      </div>
+      
+      <div class="match-area" id="matchArea">
+        <div class="match-item" data-id="1" onclick="selectMatch(this,'left')">外卖</div>
+        <div class="match-item" data-id="2" onclick="selectMatch(this,'left')">备注</div>
+        <div class="match-item" data-id="3" onclick="selectMatch(this,'left')">配送</div>
+        <div class="match-item" data-id="4" onclick="selectMatch(this,'left')">快递柜</div>
+        <div class="match-item" data-id="5" onclick="selectMatch(this,'left')">取件码</div>
+        <div class="match-item" data-id="6" onclick="selectMatch(this,'left')">赔偿</div>
+        <div class="match-item" data-id="7" onclick="selectMatch(this,'left')">差评</div>
+        <div class="match-item" data-id="8" onclick="selectMatch(this,'left')">快递</div>
+
+        <div class="match-item" data-id="4" onclick="selectMatch(this,'right')">自助存取包裹的柜子</div>
+        <div class="match-item" data-id="1" onclick="selectMatch(this,'right')">送上门的餐食服务</div>
+        <div class="match-item" data-id="6" onclick="selectMatch(this,'right')">损坏后的金额补偿</div>
+        <div class="match-item" data-id="2" onclick="selectMatch(this,'right')">下单时的特殊说明</div>
+        <div class="match-item" data-id="8" onclick="selectMatch(this,'right')">包裹快速邮寄服务</div>
+        <div class="match-item" data-id="5" onclick="selectMatch(this,'right')">取包裹的数字验证码</div>
+        <div class="match-item" data-id="3" onclick="selectMatch(this,'right')">把东西送到指定地点</div>
+        <div class="match-item" data-id="7" onclick="selectMatch(this,'right')">负面评价</div>
+      </div>
+      
+      <div class="feedback" id="matchFeedback"></div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="goTo(3)">← 上一页</button>
+      <button class="btn btn-primary" onclick="goTo(5)">下一游戏 →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 5: 情景选择 -->
+  <div class="page" id="page5">
+    <div class="card">
+      <h2>🎯 游戏2：情景选择题</h2>
+      <p class="muted">根据真实情况选择最合适的回答</p>
+      <div style="margin:10px 0;">
+        <span class="score-badge">⭐ 得分：<span id="quizScore">0</span> / 4</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div id="quizContent"></div>
+      <div class="feedback" id="quizFeedback"></div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="goTo(4)">← 上一页</button>
+      <button class="btn btn-primary" id="nextQuizBtn" onclick="nextQuiz()" style="display:none;">下一题 →</button>
+      <button class="btn btn-primary" id="toPage6Btn" onclick="goTo(6)" style="display:none;">下一游戏 →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 6: 选词填空 -->
+  <div class="page" id="page6">
+    <div class="card">
+      <h2>✏️ 游戏3：选词填空</h2>
+      <p class="muted">点击空白处，选择正确的词填入</p>
+      <div style="margin:10px 0;">
+        <span class="score-badge">⭐ 得分：<span id="fillScore">0</span> / 5</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="fill-item" id="fill1">
+        (1) 点外卖的时候，如果你不想吃辣，可以在 
+        <span class="fill-blank" id="blank1" onclick="showChoices(1)">______</span> 里写清楚。
+        <div id="choices1" style="display:none; margin-top:10px;">
+          <span class="choice-btn" onclick="chooseFill(1,'备注',true)">备注</span>
+          <span class="choice-btn" onclick="chooseFill(1,'快递柜',false)">快递柜</span>
+          <span class="choice-btn" onclick="chooseFill(1,'取件码',false)">取件码</span>
+        </div>
+      </div>
+
+      <div class="fill-item" id="fill2">
+        (2) 师傅把包裹放进了 
+        <span class="fill-blank" id="blank2" onclick="showChoices(2)">______</span>，然后给我发了一串 6 位数的 
+        <span class="fill-blank" id="blank2b" onclick="showChoices(2)">______</span>。
+        <div id="choices2" style="display:none; margin-top:10px;">
+          <span class="choice-btn" onclick="chooseFill(2,'快递柜 + 取件码',true)">快递柜 + 取件码</span>
+          <span class="choice-btn" onclick="chooseFill(2,'外卖 + 备注',false)">外卖 + 备注</span>
+          <span class="choice-btn" onclick="chooseFill(2,'配送 + 差评',false)">配送 + 差评</span>
+        </div>
+      </div>
+
+      <div class="fill-item" id="fill3">
+        (3) 骑手在 
+        <span class="fill-blank" id="blank3" onclick="showChoices(3)">______</span> 过程中把蛋糕弄坏了，平台最后给了全额 
+        <span class="fill-blank" id="blank3b" onclick="showChoices(3)">______</span>。
+        <div id="choices3" style="display:none; margin-top:10px;">
+          <span class="choice-btn" onclick="chooseFill(3,'配送 + 赔偿',true)">配送 + 赔偿</span>
+          <span class="choice-btn" onclick="chooseFill(3,'备注 + 差评',false)">备注 + 差评</span>
+          <span class="choice-btn" onclick="chooseFill(3,'取件码 + 外卖',false)">取件码 + 外卖</span>
+        </div>
+      </div>
+
+      <div class="fill-item" id="fill4">
+        (4) 外卖又慢态度又差，我生气地给了 
+        <span class="fill-blank" id="blank4" onclick="showChoices(4)">______</span>。
+        <div id="choices4" style="display:none; margin-top:10px;">
+          <span class="choice-btn" onclick="chooseFill(4,'差评',true)">差评</span>
+          <span class="choice-btn" onclick="chooseFill(4,'取件码',false)">取件码</span>
+          <span class="choice-btn" onclick="chooseFill(4,'备注',false)">备注</span>
+        </div>
+      </div>
+
+      <div class="fill-item" id="fill5">
+        (5) 我不在家的时候，快递员通常会把包裹放进 
+        <span class="fill-blank" id="blank5" onclick="showChoices(5)">______</span>。
+        <div id="choices5" style="display:none; margin-top:10px;">
+          <span class="choice-btn" onclick="chooseFill(5,'快递柜',true)">快递柜</span>
+          <span class="choice-btn" onclick="chooseFill(5,'外卖',false)">外卖</span>
+          <span class="choice-btn" onclick="chooseFill(5,'差评',false)">差评</span>
+        </div>
+      </div>
+
+      <div class="feedback" id="fillFeedback"></div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="goTo(5)">← 上一页</button>
+      <button class="btn btn-primary" onclick="goTo(7)">下一游戏 →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 7: 短信读解 -->
+  <div class="page" id="page7">
+    <div class="card">
+      <h2>📱 游戏4：短信读解</h2>
+      <p class="muted">仔细阅读短信，回答问题</p>
+      <div style="margin:10px 0;">
+        <span class="score-badge">⭐ 得分：<span id="smsScore">0</span> / 2</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sms-box">
+        <div class="sender">【菜鸟驿站】</div>
+        您的顺丰快递已到达“幸福小区 1 号柜”。取件码【663189】。请于 24 小时内凭码取件。
+      </div>
+
+      <h3>问题 1：你需要去哪里取快递？</h3>
+      <button class="quiz-option" onclick="answerSms(this,true,1)">幸福小区 1 号柜</button>
+      <button class="quiz-option" onclick="answerSms(this,false,1)">门卫室</button>
+      <button class="quiz-option" onclick="answerSms(this,false,1)">美团外卖柜</button>
+      <div class="feedback" id="smsFb1"></div>
+
+      <h3 style="margin-top:20px;">问题 2：取件码是多少？</h3>
+      <button class="quiz-option" onclick="answerSms(this,true,2)">663189</button>
+      <button class="quiz-option" onclick="answerSms(this,false,2)">661389</button>
+      <button class="quiz-option" onclick="answerSms(this,false,2)">663198</button>
+      <div class="feedback" id="smsFb2"></div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="goTo(6)">← 上一页</button>
+      <button class="btn btn-primary" onclick="goTo(8)">角色扮演 →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 8: 角色扮演 -->
+  <div class="page" id="page8">
+    <div class="card">
+      <h2>🎭 综合练习：角色扮演</h2>
+      <p class="muted">选择最自然、最合适的说法</p>
+    </div>
+
+    <div class="card">
+      <h3>任务 1：点麻辣烫，你对香菜过敏</h3>
+      <p>你需要在备注里怎么写？</p>
+      <button class="quiz-option" onclick="rolePlay(this,false,1)">麻烦多放香菜，打包带走。</button>
+      <button class="quiz-option" onclick="rolePlay(this,true,1)">麻烦微辣，千万不要放香菜。</button>
+      <button class="quiz-option" onclick="rolePlay(this,false,1)">麻烦放在快递柜，给我取件码。</button>
+      <div class="feedback" id="rp1"></div>
+    </div>
+
+    <div class="card">
+      <h3>任务 2：外卖员说小区不让进</h3>
+      <p>外卖员打电话：“您好，小区不让外卖员进去，怎么办？”你怎么回答？</p>
+      <button class="quiz-option" onclick="rolePlay(this,true,2)">没关系，请帮我放在小区门口的门卫室，我自己出来拿。</button>
+      <button class="quiz-option" onclick="rolePlay(this,false,2)">好的，麻烦你直接退款给我吧。</button>
+      <button class="quiz-option" onclick="rolePlay(this,false,2)">请你把外卖给我寄快递过来。</button>
+      <div class="feedback" id="rp2"></div>
+    </div>
+
+    <div class="card">
+      <h3>任务 3：汤洒了，要退款</h3>
+      <p>你收到外卖后发现汤全洒了，怎么说？</p>
+      <button class="quiz-option" onclick="rolePlay(this,true,3)">你好，我收到的汤完全洒了，盒饭也湿透了无法食用，请问怎么申请退款或赔偿？</button>
+      <button class="quiz-option" onclick="rolePlay(this,false,3)">不好吃，退钱。</button>
+      <button class="quiz-option" onclick="rolePlay(this,false,3)">我不要了。</button>
+      <div class="feedback" id="rp3"></div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="goTo(7)">← 上一页</button>
+      <button class="btn btn-primary" onclick="goTo(9)">查看总成绩 →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 9: 总结 -->
+  <div class="page" id="page9">
+    <div class="card highlight">
+      <div class="big-score">
+        <div class="celebrate">🎉</div>
+        <div class="number" id="finalScore">0</div>
+        <p style="font-size:1.1rem; margin-top:8px;">总分（满分 22）</p>
+        <div class="stars" id="starDisplay">⭐⭐⭐</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📝 今天学到了什么？</h2>
+      <p><strong>核心词汇：</strong>外卖、快递、备注、配送、快递柜、取件码、赔偿/退款、差评</p>
+      <p><strong>关键表达：</strong></p>
+      <ul style="padding-left:20px;">
+        <li>麻烦帮我备注一下：微辣、不要放香菜……</li>
+        <li>麻烦您把包裹放进快递柜，短信发我取件码。</li>
+        <li>汤洒了，请问怎么申请退款或赔偿？</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🏠 课后小任务</h2>
+      <p>请用今天学的句子，完成以下任意一项：</p>
+      <ul style="padding-left:20px;">
+        <li>写一条真实的外卖备注（至少包含辣度和忌口）</li>
+        <li>模拟一段「外卖洒了」的维权对话</li>
+        <li>根据真实短信，练习口头说明取件地点和取件码</li>
+      </ul>
+      <div class="tip">
+        💡 下次上课可以分享你的备注或对话，我们一起完善！
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="goTo(8)">← 返回</button>
+      <button class="btn btn-primary" onclick="location.reload()">重新开始 🔄</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentPage = 1;
+  const totalPages = 9;
+  let matchScore = 0;
+  let quizScore = 0;
+  let fillScore = 0;
+  let smsScore = 0;
+  let rolePlayScore = 0;
+  let selectedLeft = null;
+  let selectedRight = null;
+  let matchedPairs = 0;
+  let filled = {};
+
+  const quizzes = [
+    {
+      q: "你在中国点麻辣烫，但你对香菜过敏，需要在备注里怎么写？",
+      options: [
+        { text: "麻烦多放香菜，打包带走。", correct: false },
+        { text: "麻烦微辣，千万不要放香菜。", correct: true },
+        { text: "麻烦放在快递柜，给我取件码。", correct: false }
+      ]
+    },
+    {
+      q: "外卖员打来电话说：“您好，小区不让外卖员进去，怎么办？”你应该怎么回答？",
+      options: [
+        { text: "没关系，请帮我放在小区门口的门卫室，我自己出来拿。", correct: true },
+        { text: "好的，麻烦你直接退款给我吧。", correct: false },
+        { text: "请你把外卖给我寄快递过来。", correct: false }
+      ]
+    },
+    {
+      q: "包裹到了，但你现在不在家，最合适的说法是？",
+      options: [
+        { text: "请现在马上送到我家！", correct: false },
+        { text: "麻烦您把包裹放进小区的快递柜，短信发我取件码，谢谢！", correct: true },
+        { text: "我不要了。", correct: false }
+      ]
+    },
+    {
+      q: "外卖汤洒了，盒饭湿透无法食用，你怎么申请处理？",
+      options: [
+        { text: "你好，我收到的汤完全洒了，盒饭也湿透了无法食用，请问怎么申请退款或赔偿？", correct: true },
+        { text: "不好吃。", correct: false },
+        { text: "算了。", correct: false }
+      ]
+    }
+  ];
+  let currentQuiz = 0;
+  let quizStarted = false;
+
+  function goTo(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page' + page).classList.add('active');
+    currentPage = page;
+    document.getElementById('progress').style.width = (page / totalPages * 100) + '%';
+    document.getElementById('pageIndicator').textContent = page + ' / ' + totalPages;
+    
+    if (page === 5 && !quizStarted) { quizStarted = true; showQuiz(0); }
+    if (page === 9) calculateFinal();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function flipCard(el) {
+    el.classList.toggle('flipped');
+  }
+
+  // Matching
+  function selectMatch(el, side) {
+    if (el.classList.contains('correct')) return;
+    
+    if (side === 'left') {
+      document.querySelectorAll('#matchArea .match-item').forEach(i => {
+        if (i.dataset.side === 'left' && !i.classList.contains('correct')) i.classList.remove('selected');
+      });
+      selectedLeft = el;
+      el.classList.add('selected');
+    } else {
+      document.querySelectorAll('#matchArea .match-item').forEach(i => {
+        if (i.dataset.side === 'right' && !i.classList.contains('correct')) i.classList.remove('selected');
+      });
+      selectedRight = el;
+      el.classList.add('selected');
+    }
+
+    if (selectedLeft && selectedRight) checkMatch();
+  }
+
+  function checkMatch() {
+    if (selectedLeft.dataset.id === selectedRight.dataset.id) {
+      selectedLeft.classList.remove('selected');
+      selectedRight.classList.remove('selected');
+      selectedLeft.classList.add('correct');
+      selectedRight.classList.add('correct');
+      matchedPairs++;
+      matchScore = matchedPairs;
+      document.getElementById('matchScore').textContent = matchScore;
+      
+      const fb = document.getElementById('matchFeedback');
+      fb.textContent = matchedPairs === 8 ? '🎉 全部配对完成！太棒了！' : '✅ 配对成功！';
+      fb.className = 'feedback show good';
+      setTimeout(() => fb.classList.remove('show'), 1100);
+    } else {
+      selectedLeft.classList.add('wrong');
+      selectedRight.classList.add('wrong');
+      const fb = document.getElementById('matchFeedback');
+      fb.textContent = '❌ 不对哦，再试一次！';
+      fb.className = 'feedback show bad';
+      const badLeft = selectedLeft, badRight = selectedRight;
+      setTimeout(() => {
+        badLeft.classList.remove('selected', 'wrong');
+        badRight.classList.remove('selected', 'wrong');
+        if (selectedLeft === badLeft) selectedLeft = null;
+        if (selectedRight === badRight) selectedRight = null;
+        fb.classList.remove('show');
+      }, 800);
+      return;
+    }
+    selectedLeft = null;
+    selectedRight = null;
+  }
+
+  document.querySelectorAll('#matchArea .match-item').forEach((el, idx) => {
+    el.dataset.side = idx < 8 ? 'left' : 'right';
+  });
+
+  // Quiz
+  function showQuiz(index) {
+    currentQuiz = index;
+    const q = quizzes[index];
+    document.getElementById('quizContent').innerHTML = `
+      <h3>第 ${index + 1} 题 / 4</h3>
+      <p style="margin:12px 0 16px; font-size:1.02rem;">${q.q}</p>
+      ${q.options.map(opt => 
+        `<button class="quiz-option" onclick="answerQuiz(this, ${opt.correct})">${opt.text}</button>`
+      ).join('')}
+    `;
+    document.getElementById('quizFeedback').className = 'feedback';
+    document.getElementById('nextQuizBtn').style.display = 'none';
+    document.getElementById('toPage6Btn').style.display = 'none';
+  }
+
+  function answerQuiz(btn, isCorrect) {
+    if (btn.classList.contains('disabled')) return;
+    const options = document.querySelectorAll('#quizContent .quiz-option');
+    options.forEach(o => o.classList.add('disabled'));
+    
+    if (isCorrect) {
+      btn.classList.add('correct');
+      quizScore++;
+      document.getElementById('quizScore').textContent = quizScore;
+      document.getElementById('quizFeedback').textContent = '✅ 正确！';
+      document.getElementById('quizFeedback').className = 'feedback show good';
+    } else {
+      btn.classList.add('wrong');
+      options.forEach(o => {
+        if (o.onclick.toString().includes('true')) o.classList.add('correct');
+      });
+      document.getElementById('quizFeedback').textContent = '❌ 再想想～';
+      document.getElementById('quizFeedback').className = 'feedback show bad';
+    }
+    
+    if (currentQuiz < quizzes.length - 1) {
+      document.getElementById('nextQuizBtn').style.display = 'inline-flex';
+    } else {
+      document.getElementById('toPage6Btn').style.display = 'inline-flex';
+    }
+  }
+
+  function nextQuiz() {
+    showQuiz(currentQuiz + 1);
+  }
+
+  // Fill blanks
+  function showChoices(num) {
+    document.getElementById('choices' + num).style.display = 'block';
+  }
+
+  function chooseFill(num, text, isCorrect) {
+    if (filled[num]) return;
+    filled[num] = true;
+    
+    const blank = document.getElementById('blank' + num);
+    if (num === 2 || num === 3) {
+      // dual blanks
+      if (num === 2) {
+        document.getElementById('blank2').textContent = '快递柜';
+        document.getElementById('blank2b').textContent = '取件码';
+      } else {
+        document.getElementById('blank3').textContent = '配送';
+        document.getElementById('blank3b').textContent = '赔偿';
+      }
+    } else {
+      blank.textContent = text;
+    }
+    
+    const choices = document.getElementById('choices' + num);
+    choices.querySelectorAll('.choice-btn').forEach(btn => {
+      btn.style.pointerEvents = 'none';
+      if (btn.textContent.includes(text.split(' + ')[0]) || (isCorrect && btn.onclick.toString().includes('true'))) {
+        if (isCorrect) btn.classList.add('correct');
+        else if (btn.textContent === text) btn.classList.add('wrong');
+      }
+      if (isCorrect && btn.onclick.toString().includes('true')) btn.classList.add('correct');
+      if (!isCorrect && btn.textContent === text) btn.classList.add('wrong');
+    });
+    
+    // highlight correct one
+    choices.querySelectorAll('.choice-btn').forEach(btn => {
+      if (btn.onclick.toString().includes('true')) btn.classList.add('correct');
+    });
+    
+    if (isCorrect) {
+      fillScore++;
+      document.getElementById('fillScore').textContent = fillScore;
+    }
+    
+    const fb = document.getElementById('fillFeedback');
+    fb.textContent = isCorrect ? '✅ 填对了！' : '❌ 不对，看看正确答案';
+    fb.className = 'feedback show ' + (isCorrect ? 'good' : 'bad');
+    setTimeout(() => fb.classList.remove('show'), 1200);
+  }
+
+  // SMS
+  function answerSms(btn, isCorrect, qNum) {
+    if (btn.classList.contains('disabled')) return;
+    const parent = btn.parentElement;
+    const sameQuestion = Array.from(parent.querySelectorAll('.quiz-option'))
+      .filter(o => o.getAttribute('onclick').endsWith(',' + qNum + ')'));
+    sameQuestion.forEach(o => o.classList.add('disabled'));
+    
+    const fb = document.getElementById('smsFb' + qNum);
+    if (isCorrect) {
+      btn.classList.add('correct');
+      smsScore++;
+      document.getElementById('smsScore').textContent = smsScore;
+      fb.textContent = '✅ 正确！';
+      fb.className = 'feedback show good';
+    } else {
+      btn.classList.add('wrong');
+      sameQuestion.forEach(o => {
+        if (o.onclick.toString().includes('true')) o.classList.add('correct');
+      });
+      fb.textContent = '❌ 再看一遍短信';
+      fb.className = 'feedback show bad';
+    }
+  }
+
+  // Role play
+  function rolePlay(btn, isCorrect, taskNum) {
+    if (btn.classList.contains('disabled')) return;
+    const options = btn.parentElement.querySelectorAll('.quiz-option');
+    options.forEach(o => o.classList.add('disabled'));
+    
+    const fb = document.getElementById('rp' + taskNum);
+    if (isCorrect) {
+      btn.classList.add('correct');
+      rolePlayScore++;
+      fb.textContent = '✅ 很自然！';
+      fb.className = 'feedback show good';
+    } else {
+      btn.classList.add('wrong');
+      options.forEach(o => {
+        if (o.onclick.toString().includes('true')) o.classList.add('correct');
+      });
+      fb.textContent = '❌ 这个说法不太合适';
+      fb.className = 'feedback show bad';
+    }
+  }
+
+  function calculateFinal() {
+    const total = matchScore + quizScore + fillScore + smsScore + rolePlayScore;
+    document.getElementById('finalScore').textContent = total;
+    
+    let stars = '';
+    if (total >= 19) stars = '⭐⭐⭐⭐⭐';
+    else if (total >= 15) stars = '⭐⭐⭐⭐';
+    else if (total >= 11) stars = '⭐⭐⭐';
+    else if (total >= 7) stars = '⭐⭐';
+    else stars = '⭐';
+    document.getElementById('starDisplay').textContent = stars;
+  }
+
+  goTo(1);
+</script>
+</body>
+</html>
