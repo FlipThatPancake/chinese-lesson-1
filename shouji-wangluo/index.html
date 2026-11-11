@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>手机卡 & 网络 & 宽带 | HSK5 实用中文</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --card: #f7f6f3;
+    --accent: #2eaadc;
+    --accent2: #0f7b6c;
+    --accent3: #eb5757;
+    --text: #37352f;
+    --muted: #787774;
+    --border: #e9e9e7;
+    --success: #0f7b6c;
+    --warning: #d9730d;
+    --purple: #6940a5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: #fbfbfa;
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  .app {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 20px 16px 80px;
+  }
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 12px 0;
+  }
+  .logo {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--accent2);
+  }
+  .progress-wrap {
+    flex: 1;
+    margin: 0 12px;
+    height: 8px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    width: 11%;
+    transition: width 0.4s ease;
+  }
+  .page-indicator {
+    font-size: 0.85rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .page {
+    display: none;
+    animation: fadeIn 0.35s ease;
+  }
+  .page.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card.highlight {
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border-color: #bae6fd;
+  }
+  h1 {
+    font-size: 1.55rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-size: 1.2rem;
+    font-weight: 650;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 14px 0 8px;
+  }
+  p { margin-bottom: 12px; }
+  .muted { color: var(--muted); font-size: 0.95rem; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn-primary {
+    background: var(--accent2);
+    color: white;
+  }
+  .btn-primary:hover { background: #0a5c52; transform: translateY(-1px); }
+  .btn-secondary {
+    background: white;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--card); }
+  .nav-btns {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 26px;
+    gap: 12px;
+  }
+  .word-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .word-card {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    user-select: none;
+  }
+  .word-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .word-card.flipped {
+    background: linear-gradient(135deg, #e6f7f5, #f0f9ff);
+    border-color: var(--accent2);
+  }
+  .word-card .hanzi {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .word-card .meaning {
+    font-size: 0.78rem;
+    color: var(--muted);
+    display: none;
+    line-height: 1.35;
+  }
+  .word-card.flipped .meaning { display: block; color: var(--accent2); font-weight: 500; }
+  .match-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  @media (max-width: 520px) {
+    .match-area { grid-template-columns: 1fr; }
+  }
+  .match-item {
+    padding: 12px 14px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    font-weight: 500;
+    transition: all 0.2s;
+    background: white;
+    font-size: 0.9rem;
+  }
+  .match-item:hover { border-color: var(--accent); }
+  .match-item.selected {
+    border-color: var(--accent);
+    background: #e8f6fc;
+  }
+  .match-item.correct {
+    border-color: var(--success);
+    background: #e6f7f5;
+    pointer-events: none;
+  }
+  .match-item.wrong {
+    border-color: var(--accent3);
+    background: #fdecea;
+    animation: shake 0.4s;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  .quiz-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 13px 16px;
+    margin: 8px 0;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    line-height: 1.4;
+  }
+  .quiz-option:hover { border-color: var(--accent); background: #f8fcff; }
+  .quiz-option.correct {
+    border-color: var(--success);
+    background: #e6f7f5;
+  }
+  .quiz-option.wrong {
+    border-color: var(--accent3);
+    background: #fdecea;
+  }
+  .quiz-option.disabled { pointer-events: none; }
+  .score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff7e6;
+    color: #d9730d;
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .feedback {
+    margin-top: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.good { background: #e6f7f5; color: var(--success); }
+  .feedback.bad { background: #fdecea; color: var(--accent3); }
+  .dialogue-box {
+    background: #f7f6f3;
+    border-radius: 12px;
+    padding: 14px;
+    margin: 12px 0;
+  }
+  .bubble {
+    max-width: 92%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    margin: 8px 0;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+  .bubble.left {
+    background: white;
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+  }
+  .tag {
+    display: inline-block;
+    background: #e8f6fc;
+    color: var(--accent);
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  .tag.green { background: #e6f7f5; color: var(--accent2); }
+  .tag.orange { background: #fff7e6; color: #d9730d; }
+  .tag.purple { background: #f3e8ff; color: var(--purple); }
+  .tip {
+    background: #fff9eb;
+    border-left: 4px solid #f5a623;
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 0.95rem;
+  }
+  .big-score {
+    text-align: center;
+    padding: 28px 20px;
+  }
+  .big-score .number {
+    font-size: 3.4rem;
+    font-weight: 800;
+    color: var(--accent2);
+    line-height: 1;
+  }
+  .stars {
+    font-size: 1.9rem;
+    margin: 12px 0;
+  }
+  .celebrate {
+    text-align: center;
+    font-size: 2.4rem;
+    margin: 8px 0;
+  }
+  .level-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #6940a5, #9b59b6);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+  .fill-item {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 10px 0;
+    font-size: 0.95rem;
+  }
+  .fill-blank {
+    display: inline-block;
+    min-width: 80px;
+    border-bottom: 2px dashed var(--accent);
+    text-align: center;
+    padding: 0 6px;
+    margin: 0 2px;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+  .choice-btn {
+    display: inline-block;
+    margin: 4px 6px 4px 0;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    background: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .choice-btn:hover { border-color: var(--accent); }
+  .choice-btn.correct {
+    border-color: var(--success);
+    background: #e6f7f5;
+  }
+  .choice-btn.wrong {
+    border-color: var(--accent3);
+    background: #fdecea;
+  }
+  .lesson-home{display:grid;place-items:center;flex:none;width:40px;height:40px;border:1px solid var(--border);border-radius:10px;color:var(--text);background:#fff;text-decoration:none}
+  .lesson-home:hover{background:var(--card)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <a class="lesson-home" href="../index.html#shouji-wangluo" aria-label="返回课程选择" title="返回课程选择"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="m3 10 9-7 9 7M5 9v12h5v-7h4v7h5V9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <div class="logo" style="margin-left:12px">📱 手机卡·网络·宽带 <span class="level-badge">HSK5</span></div>
+    <div class="progress-wrap"><div class="progress-bar" id="progress"></div></div>
+    <div class="page-indicator" id="pageIndicator">1 / 9</div>
+  </div>
+
+  <!-- PAGE 1 -->
+  <div class="page active" id="page1">
+    <div class="card highlight">
+      <h1>📱 手机卡 · 网络 · 宽带</h1>
+      <p class="muted">办卡、选套餐、处理信号问题，以及预约安装宽带和路由器</p>
+      <div style="margin-top:16px;">
+        <span class="tag purple">HSK5</span>
+        <span class="tag green">实用口语</span>
+        <span class="tag orange">宽带安装</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🎯 今天的目标</h2>
+      <p>学完这节课，你能用较完整、得体的中文：</p>
+      <ul style="padding-left:20px; margin:12px 0;">
+        <li>办理手机卡并咨询套餐</li>
+        <li>处理流量、信号与断网问题</li>
+        <li>预约宽带安装并沟通上门时间</li>
+        <li>询问路由器设置与网速相关问题</li>
+      </ul>
+      <div class="tip">
+        💡 本课已加入「宽带预约安装」和「路由器」相关内容，更贴近实际搬家后的需求。
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <div></div>
+      <button class="btn btn-primary" onclick="goTo(2)">开始学习 →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 2: 生词 -->
+  <div class="page" id="page2">
+    <div class="card">
+      <h2>📚 今日重点词汇（点击翻转）</h2>
+      <p class="muted">共 10 个实用词汇，包含宽带与路由器相关内容</p>
+      
+      <div class="word-grid">
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">套餐</div>
+          <div class="meaning">运营商提供的通话+流量组合方案</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">流量</div>
+          <div class="meaning">手机上网可使用的数据量</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">实名认证</div>
+          <div class="meaning">用真实身份信息登记手机卡</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">信号</div>
+          <div class="meaning">手机接收到的网络强弱</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">断网</div>
+          <div class="meaning">突然无法连接网络</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">宽带</div>
+          <div class="meaning">家庭高速有线/光纤网络服务</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">预约安装</div>
+          <div class="meaning">提前约定上门安装时间</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">路由器</div>
+          <div class="meaning">将宽带信号转成无线网络的设备</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">光纤</div>
+          <div class="meaning">传输网络信号的光缆线路</div>
+        </div>
+        <div class="word-card" onclick="flipCard(this)">
+          <div class="hanzi">调测</div>
+          <div class="meaning">安装后调试设备与网络是否正常</div>
+        </div>
+      </div>
+      
+      <div class="tip">
+        ✨ 搬家后通常需要同时办理手机卡和宽带。安装师傅上门时会进行「调测」。
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="goTo(1)">← 上一页</button>
+      <button class="btn btn-primary" onclick="goTo(3)">下一页 →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 3: 表达 -->
+  <div class="page" id="page3">
+    <div class="card">
+      <h2>💬 高阶实用表达</h2>
+      <p class="muted">完整、得体的句子，适合真实沟通</p>
+    </div>
+
+    <div class="card">
+      <h3>📋 办卡 & 选套餐</h3>
+      <div class="dialogue-box">
+        <div class="bubble left">您好，我想办一张手机卡，请问目前有哪些适合长期使用的套餐？</div>
+        <div class="bubble left">这个套餐每月包含多少流量？合约期是多久？</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📡 信号 & 断网</h3>
+      <div class="dialogue-box">
+        <div class="bubble left">最近家里信号一直很差，经常断网，请问可以帮我反馈并安排排查吗？</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🏠 宽带预约安装（新增）</h3>
+      <div class="dialogue-box">
+        <div class="bubble left">您好，我想预约安装宽带，请问最早可以什么时候上门？</div>
+        <div class="bubble left">安装当天需要我准备什么？光纤已经到户了吗？</div>
+        <div class="bubble left">麻烦确认一下安装地址和联系电话，我希望上午安装。</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📶 路由器相关（新增）</h3>
+      <div class="dialogue-box">
+        <div class="bubble left">请问师傅会帮忙设置路由器吗？需要我自己准备设备吗？</div>
+        <div class="bubble left">安装完成后，能否帮我测试一下网速和信号覆盖？</div>
+        <div class="bubble left">路由器的管理密码是多少？怎么修改Wi-Fi名称？</div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="goTo(2)">← 上一页</button>
+      <button class="btn btn-primary" onclick="goTo(4)">开始游戏 →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 4: 配对 -->
+  <div class="page" id="page4">
+    <div class="card">
+      <h2>🎮 游戏1：精准配对</h2>
+      <p class="muted">将词语与最准确的释义配对（含新增词汇）</p>
+      <div style="margin:10px 0;">
+        <span class="score-badge">⭐ 得分：<span id="matchScore">0</span> / 10</span>
+      </div>
+      
+      <div class="match-area" id="matchArea">
+        <div class="match-item" data-id="1" onclick="selectMatch(this,'left')">套餐</div>
+        <div class="match-item" data-id="2" onclick="selectMatch(this,'left')">流量</div>
+        <div class="match-item" data-id="3" onclick="selectMatch(this,'left')">实名认证</div>
+        <div class="match-item" data-id="4" onclick="selectMatch(this,'left')">信号</div>
+        <div class="match-item" data-id="5" onclick="selectMatch(this,'left')">断网</div>
+        <div class="match-item" data-id="6" onclick="selectMatch(this,'left')">宽带</div>
+        <div class="match-item" data-id="7" onclick="selectMatch(this,'left')">预约安装</div>
+        <div class="match-item" data-id="8" onclick="selectMatch(this,'left')">路由器</div>
+        <div class="match-item" data-id="9" onclick="selectMatch(this,'left')">光纤</div>
+        <div class="match-item" data-id="10" onclick="selectMatch(this,'left')">调测</div>
+
+        <div class="match-item" data-id="5" onclick="selectMatch(this,'right')">突然无法连接网络</div>
+        <div class="match-item" data-id="1" onclick="selectMatch(this,'right')">通话与流量的组合方案</div>
+        <div class="match-item" data-id="8" onclick="selectMatch(this,'right')">将宽带转成无线网络的设备</div>
+        <div class="match-item" data-id="3" onclick="selectMatch(this,'right')">用真实身份登记手机卡</div>
+        <div class="match-item" data-id="6" onclick="selectMatch(this,'right')">家庭高速网络服务</div>
+        <div class="match-item" data-id="2" onclick="selectMatch(this,'right')">手机上网可使用的数据量</div>
+        <div class="match-item" data-id="10" onclick="selectMatch(this,'right')">安装后调试设备与网络</div>
+        <div class="match-item" data-id="4" onclick="selectMatch(this,'right')">手机接收到的网络强弱</div>
+        <div class="match-item" data-id="7" onclick="selectMatch(this,'right')">提前约定上门安装时间</div>
+        <div class="match-item" data-id="9" onclick="selectMatch(this,'right')">传输网络信号的光缆</div>
+      </div>
+      
+      <div class="feedback" id="matchFeedback"></div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="goTo(3)">← 上一页</button>
+      <button class="btn btn-primary" onclick="goTo(5)">下一游戏 →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 5: 情景选择 -->
+  <div class="page" id="page5">
+    <div class="card">
+      <h2>🎯 游戏2：情景判断</h2>
+      <p class="muted">选择最得体、最完整的回答</p>
+      <div style="margin:10px 0;">
+        <span class="score-badge">⭐ 得分：<span id="quizScore">0</span> / 5</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div id="quizContent"></div>
+      <div class="feedback" id="quizFeedback"></div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="goTo(4)">← 上一页</button>
+      <button class="btn btn-primary" id="nextQuizBtn" onclick="nextQuiz()" style="display:none;">下一题 →</button>
+      <button class="btn btn-primary" id="toPage6Btn" onclick="goTo(6)" style="display:none;">下一游戏 →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 6: 选词填空 -->
+  <div class="page" id="page6">
+    <div class="card">
+      <h2>✏️ 游戏3：选词填空</h2>
+      <p class="muted">点击空白处选择正确词语</p>
+      <div style="margin:10px 0;">
+        <span class="score-badge">⭐ 得分：<span id="fillScore">0</span> / 5</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="fill-item">
+        (1) 办理手机卡时必须完成 
+        <span class="fill-blank" id="blank1" onclick="showChoices(1)">______</span>。
+        <div id="choices1" style="display:none; margin-top:10px;">
+          <span class="choice-btn" onclick="chooseFill(1,'实名认证',true)">实名认证</span>
+          <span class="choice-btn" onclick="chooseFill(1,'路由器',false)">路由器</span>
+          <span class="choice-btn" onclick="chooseFill(1,'调测',false)">调测</span>
+        </div>
+      </div>
+
+      <div class="fill-item">
+        (2) 搬家后需要安装家里的高速网络，也就是 
+        <span class="fill-blank" id="blank2" onclick="showChoices(2)">______</span>。
+        <div id="choices2" style="display:none; margin-top:10px;">
+          <span class="choice-btn" onclick="chooseFill(2,'宽带',true)">宽带</span>
+          <span class="choice-btn" onclick="chooseFill(2,'流量',false)">流量</span>
+          <span class="choice-btn" onclick="chooseFill(2,'套餐',false)">套餐</span>
+        </div>
+      </div>
+
+      <div class="fill-item">
+        (3) 安装前要先 
+        <span class="fill-blank" id="blank3" onclick="showChoices(3)">______</span>，约定师傅上门的时间。
+        <div id="choices3" style="display:none; margin-top:10px;">
+          <span class="choice-btn" onclick="chooseFill(3,'预约安装',true)">预约安装</span>
+          <span class="choice-btn" onclick="chooseFill(3,'充值',false)">充值</span>
+          <span class="choice-btn" onclick="chooseFill(3,'断网',false)">断网</span>
+        </div>
+      </div>
+
+      <div class="fill-item">
+        (4) 把有线网络变成无线网络的设备叫 
+        <span class="fill-blank" id="blank4" onclick="showChoices(4)">______</span>。
+        <div id="choices4" style="display:none; margin-top:10px;">
+          <span class="choice-btn" onclick="chooseFill(4,'路由器',true)">路由器</span>
+          <span class="choice-btn" onclick="chooseFill(4,'光纤',false)">光纤</span>
+          <span class="choice-btn" onclick="chooseFill(4,'信号',false)">信号</span>
+        </div>
+      </div>
+
+      <div class="fill-item">
+        (5) 安装完成后，师傅会进行 
+        <span class="fill-blank" id="blank5" onclick="showChoices(5)">______</span>，确保网络正常。
+        <div id="choices5" style="display:none; margin-top:10px;">
+          <span class="choice-btn" onclick="chooseFill(5,'调测',true)">调测</span>
+          <span class="choice-btn" onclick="chooseFill(5,'实名认证',false)">实名认证</span>
+          <span class="choice-btn" onclick="chooseFill(5,'套餐',false)">套餐</span>
+        </div>
+      </div>
+
+      <div class="feedback" id="fillFeedback"></div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="goTo(5)">← 上一页</button>
+      <button class="btn btn-primary" onclick="goTo(7)">下一游戏 →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 7: 角色扮演 -->
+  <div class="page" id="page7">
+    <div class="card">
+      <h2>🎭 综合练习：角色扮演</h2>
+      <p class="muted">选择最专业、完整的表达</p>
+    </div>
+
+    <div class="card">
+      <h3>任务 1：办手机卡</h3>
+      <p>第一次去营业厅，怎么开口最合适？</p>
+      <button class="quiz-option" onclick="rolePlay(this,false,1)">给我办一张卡。</button>
+      <button class="quiz-option" onclick="rolePlay(this,true,1)">您好，我想办一张手机卡。请问目前有哪些适合长期使用的套餐？办理需要提供哪些材料？</button>
+      <button class="quiz-option" onclick="rolePlay(this,false,1)">有没有便宜的？</button>
+      <div class="feedback" id="rp1"></div>
+    </div>
+
+    <div class="card">
+      <h3>任务 2：预约宽带安装</h3>
+      <p>你想预约上门安装宽带，怎么说？</p>
+      <button class="quiz-option" onclick="rolePlay(this,true,2)">您好，我想预约安装宽带。请问最早可以什么时候上门？安装当天需要我准备什么？</button>
+      <button class="quiz-option" onclick="rolePlay(this,false,2)">快点来装网。</button>
+      <button class="quiz-option" onclick="rolePlay(this,false,2)">你们什么时候有空？</button>
+      <div class="feedback" id="rp2"></div>
+    </div>
+
+    <div class="card">
+      <h3>任务 3：询问路由器</h3>
+      <p>安装时你想确认路由器相关问题，最合适的说法是？</p>
+      <button class="quiz-option" onclick="rolePlay(this,false,3)">路由器怎么弄？</button>
+      <button class="quiz-option" onclick="rolePlay(this,true,3)">请问师傅会帮忙设置路由器吗？需要我自己准备设备吗？安装后能否帮我测试一下网速？</button>
+      <button class="quiz-option" onclick="rolePlay(this,false,3)">给我一个路由器。</button>
+      <div class="feedback" id="rp3"></div>
+    </div>
+
+    <div class="card">
+      <h3>任务 4：反映信号问题</h3>
+      <p>宽带装好后信号不好，怎么向客服反映？</p>
+      <button class="quiz-option" onclick="rolePlay(this,true,4)">安装后家里信号覆盖不好，有些房间经常断网。请问可以安排重新调测或检查路由器位置吗？</button>
+      <button class="quiz-option" onclick="rolePlay(this,false,4)">网不好。</button>
+      <button class="quiz-option" onclick="rolePlay(this,false,4)">你们装得有问题。</button>
+      <div class="feedback" id="rp4"></div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="goTo(6)">← 上一页</button>
+      <button class="btn btn-primary" onclick="goTo(8)">查看总成绩 →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 8: 总结 -->
+  <div class="page" id="page8">
+    <div class="card highlight">
+      <div class="big-score">
+        <div class="celebrate">🎉</div>
+        <div class="number" id="finalScore">0</div>
+        <p style="font-size:1.1rem; margin-top:8px;">总分（满分 24）</p>
+        <div class="stars" id="starDisplay">⭐⭐⭐</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📝 今天掌握的内容</h2>
+      <p><strong>重点词汇：</strong>套餐、流量、实名认证、信号、断网、宽带、预约安装、路由器、光纤、调测</p>
+      <p><strong>核心能力：</strong></p>
+      <ul style="padding-left:20px;">
+        <li>办理手机卡并咨询套餐</li>
+        <li>处理流量与信号问题</li>
+        <li>预约宽带上门安装</li>
+        <li>沟通路由器设置与网速测试</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🏠 课后任务</h2>
+      <p>请用今天学的至少 5 个新词，完成以下任意一项：</p>
+      <ul style="padding-left:20px;">
+        <li>写一段「预约宽带安装」的完整对话</li>
+        <li>模拟向师傅询问路由器设置的问题</li>
+        <li>列出你办理宽带时需要确认的事项（时间、设备、网速等）</li>
+      </ul>
+      <div class="tip">
+        💡 下次课可以一起练习口头陈述。
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="goTo(7)">← 返回</button>
+      <button class="btn btn-primary" onclick="goTo(1)">重新开始 🔄</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentPage = 1;
+  const totalPages = 8;
+  let matchScore = 0;
+  let quizScore = 0;
+  let fillScore = 0;
+  let rolePlayScore = 0;
+  let selectedLeft = null;
+  let selectedRight = null;
+  let matchedPairs = 0;
+  let filled = {};
+
+  const quizzes = [
+    {
+      q: "你第一次去营业厅办手机卡，最得体的开场是？",
+      options: [
+        { text: "给我办一张卡。", correct: false },
+        { text: "您好，我想办一张手机卡。请问目前有哪些适合长期使用的套餐？办理需要提供哪些材料？", correct: true },
+        { text: "有没有免费的？", correct: false }
+      ]
+    },
+    {
+      q: "你想预约安装宽带，最完整的说法是？",
+      options: [
+        { text: "快点来装网。", correct: false },
+        { text: "您好，我想预约安装宽带。请问最早可以什么时候上门？安装当天需要我准备什么？", correct: true },
+        { text: "你们什么时候有空？", correct: false }
+      ]
+    },
+    {
+      q: "安装时询问路由器问题，最合适的表达是？",
+      options: [
+        { text: "路由器怎么弄？", correct: false },
+        { text: "请问师傅会帮忙设置路由器吗？需要我自己准备设备吗？安装后能否帮我测试一下网速？", correct: true },
+        { text: "给我一个路由器。", correct: false }
+      ]
+    },
+    {
+      q: "宽带装好后信号不好，怎么向客服反映最专业？",
+      options: [
+        { text: "网不好。", correct: false },
+        { text: "安装后家里信号覆盖不好，有些房间经常断网。请问可以安排重新调测或检查路由器位置吗？", correct: true },
+        { text: "你们装得有问题。", correct: false }
+      ]
+    },
+    {
+      q: "想确认光纤是否已经到户，怎么问？",
+      options: [
+        { text: "有网吗？", correct: false },
+        { text: "请问我们家的光纤已经到户了吗？安装前需要确认一下线路情况。", correct: true },
+        { text: "能不能装？", correct: false }
+      ]
+    }
+  ];
+  let currentQuiz = 0;
+
+  function goTo(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page' + page).classList.add('active');
+    currentPage = page;
+    document.getElementById('progress').style.width = (page / totalPages * 100) + '%';
+    document.getElementById('pageIndicator').textContent = page + ' / ' + totalPages;
+    
+    if (page === 5 && currentQuiz === 0) showQuiz(0);
+    if (page === 8) calculateFinal();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function flipCard(el) {
+    el.classList.toggle('flipped');
+  }
+
+  function selectMatch(el, side) {
+    if (el.classList.contains('correct')) return;
+    
+    if (side === 'left') {
+      document.querySelectorAll('#matchArea .match-item').forEach(i => {
+        if (i.dataset.side === 'left' && !i.classList.contains('correct')) i.classList.remove('selected');
+      });
+      selectedLeft = el;
+      el.classList.add('selected');
+    } else {
+      document.querySelectorAll('#matchArea .match-item').forEach(i => {
+        if (i.dataset.side === 'right' && !i.classList.contains('correct')) i.classList.remove('selected');
+      });
+      selectedRight = el;
+      el.classList.add('selected');
+    }
+
+    if (selectedLeft && selectedRight) checkMatch();
+  }
+
+  function checkMatch() {
+    if (selectedLeft.dataset.id === selectedRight.dataset.id) {
+      selectedLeft.classList.remove('selected');
+      selectedRight.classList.remove('selected');
+      selectedLeft.classList.add('correct');
+      selectedRight.classList.add('correct');
+      matchedPairs++;
+      matchScore = matchedPairs;
+      document.getElementById('matchScore').textContent = matchScore;
+      
+      const fb = document.getElementById('matchFeedback');
+      fb.textContent = matchedPairs === 10 ? '🎉 全部配对完成！' : '✅ 配对成功！';
+      fb.className = 'feedback show good';
+      setTimeout(() => fb.classList.remove('show'), 1100);
+    } else {
+      selectedLeft.classList.add('wrong');
+      selectedRight.classList.add('wrong');
+      const fb = document.getElementById('matchFeedback');
+      fb.textContent = '❌ 不匹配，再试试！';
+      fb.className = 'feedback show bad';
+      setTimeout(() => {
+        selectedLeft.classList.remove('selected', 'wrong');
+        selectedRight.classList.remove('selected', 'wrong');
+        selectedLeft = null;
+        selectedRight = null;
+        fb.classList.remove('show');
+      }, 800);
+      return;
+    }
+    selectedLeft = null;
+    selectedRight = null;
+  }
+
+  document.querySelectorAll('#matchArea .match-item').forEach((el, idx) => {
+    el.dataset.side = idx < 10 ? 'left' : 'right';
+  });
+
+  function showQuiz(index) {
+    currentQuiz = index;
+    const q = quizzes[index];
+    document.getElementById('quizContent').innerHTML = `
+      <h3>第 ${index + 1} 题 / 5</h3>
+      <p style="margin:12px 0 16px; font-size:1.02rem;">${q.q}</p>
+      ${q.options.map(opt => 
+        `<button class="quiz-option" onclick="answerQuiz(this, ${opt.correct})">${opt.text}</button>`
+      ).join('')}
+    `;
+    document.getElementById('quizFeedback').className = 'feedback';
+    document.getElementById('nextQuizBtn').style.display = 'none';
+    document.getElementById('toPage6Btn').style.display = 'none';
+  }
+
+  function answerQuiz(btn, isCorrect) {
+    const options = document.querySelectorAll('#quizContent .quiz-option');
+    options.forEach(o => o.classList.add('disabled'));
+    
+    if (isCorrect) {
+      btn.classList.add('correct');
+      quizScore++;
+      document.getElementById('quizScore').textContent = quizScore;
+      document.getElementById('quizFeedback').textContent = '✅ 选择得体且完整！';
+      document.getElementById('quizFeedback').className = 'feedback show good';
+    } else {
+      btn.classList.add('wrong');
+      options.forEach(o => {
+        if (o.onclick.toString().includes('true')) o.classList.add('correct');
+      });
+      document.getElementById('quizFeedback').textContent = '❌ 这个说法不够专业或完整';
+      document.getElementById('quizFeedback').className = 'feedback show bad';
+    }
+    
+    if (currentQuiz < quizzes.length - 1) {
+      document.getElementById('nextQuizBtn').style.display = 'inline-flex';
+    } else {
+      document.getElementById('toPage6Btn').style.display = 'inline-flex';
+    }
+  }
+
+  function nextQuiz() {
+    showQuiz(currentQuiz + 1);
+  }
+
+  function showChoices(num) {
+    document.getElementById('choices' + num).style.display = 'block';
+  }
+
+  function chooseFill(num, text, isCorrect) {
+    if (filled[num]) return;
+    filled[num] = true;
+    
+    document.getElementById('blank' + num).textContent = text;
+    
+    const choices = document.getElementById('choices' + num);
+    choices.querySelectorAll('.choice-btn').forEach(btn => {
+      btn.style.pointerEvents = 'none';
+      if (btn.onclick.toString().includes('true')) btn.classList.add('correct');
+      if (!isCorrect && btn.textContent === text) btn.classList.add('wrong');
+    });
+    
+    if (isCorrect) {
+      fillScore++;
+      document.getElementById('fillScore').textContent = fillScore;
+    }
+    
+    const fb = document.getElementById('fillFeedback');
+    fb.textContent = isCorrect ? '✅ 填对了！' : '❌ 不对，请看正确答案';
+    fb.className = 'feedback show ' + (isCorrect ? 'good' : 'bad');
+    setTimeout(() => fb.classList.remove('show'), 1200);
+  }
+
+  function rolePlay(btn, isCorrect, taskNum) {
+    const options = btn.parentElement.querySelectorAll('.quiz-option');
+    options.forEach(o => o.classList.add('disabled'));
+    
+    const fb = document.getElementById('rp' + taskNum);
+    if (isCorrect) {
+      btn.classList.add('correct');
+      rolePlayScore++;
+      fb.textContent = '✅ 表达专业、完整！';
+      fb.className = 'feedback show good';
+    } else {
+      btn.classList.add('wrong');
+      options.forEach(o => {
+        if (o.onclick.toString().includes('true')) o.classList.add('correct');
+      });
+      fb.textContent = '❌ 这个说法过于简单或不够礼貌';
+      fb.className = 'feedback show bad';
+    }
+  }
+
+  function calculateFinal() {
+    const total = matchScore + quizScore + fillScore + rolePlayScore;
+    document.getElementById('finalScore').textContent = total;
+    
+    let stars = '';
+    if (total >= 20) stars = '⭐⭐⭐⭐⭐';
+    else if (total >= 16) stars = '⭐⭐⭐⭐';
+    else if (total >= 12) stars = '⭐⭐⭐';
+    else if (total >= 8) stars = '⭐⭐';
+    else stars = '⭐';
+    document.getElementById('starDisplay').textContent = stars;
+  }
+
+  goTo(1);
+</script>
+</body>
+</html>

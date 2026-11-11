@@ -6,6 +6,7 @@ A static lesson library for teacher-led classes. Open `index.html`, choose a les
 - `liya/index.html` — renting and maintenance
 - `ruslan/index.html` — rear-end collisions, beginner Chinese
 - `waimai-kuaidi/index.html` — food delivery and parcel pickup
+- `shouji-wangluo/index.html` — phone SIM cards, mobile data and home broadband (HSK5)
 - `rental-original/index.html` — the original Beijing rental task, preserved with its existing activities
 
 Each lesson includes its own images, activities, and offline word help (pinyin, English, Russian). Liya's video is played separately by the teacher. Completion marks are stored in the current browser when local storage is available; they do not sync between devices. The top progress bar follows the current slide.
